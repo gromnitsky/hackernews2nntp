@@ -1,4 +1,5 @@
 From: {{{ mail.from }}}
+Date: {{ mail.date }}
 Subject: {{ title }}
 Newsgroups: {{ mail.newsgroup }}
 Message-ID: {{ mail.message_id }}
@@ -20,7 +21,6 @@ Content-Type: text/plain; charset=utf-8
 Discussion: {{{ mail.permalink }}}
 
 --{{ mail.boundary }}
-
 Content-ID: {{ mail.content_id.html }}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/html; charset=utf-8
