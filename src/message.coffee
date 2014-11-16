@@ -1,5 +1,8 @@
 fs = require 'fs'
 path = require 'path'
+crypto = require 'crypto'
+os = require 'os'
+
 Mustache = require 'mustache'
 
 class Message
@@ -13,7 +16,11 @@ class Message
     # TODO: validate @json_data
 
   id: ->
-    "#{@json_data.id}_#{@json_data.type}@news.ycombinator.com"
+    "#{@json_data.id}@news.ycombinator.com"
+
+  parent_id: ->
+    return '' unless @json_data.parent
+    "#{@json_data.parent}@news.ycombinator.com"
 
   # return an obj
   #
@@ -23,20 +30,21 @@ class Message
   #   html: 789
   # }
   content_id: ->
+    r = "#{@json_data.time}_#{crypto.pseudoRandomBytes(8).toString('hex')}@#{os.hostname()}"
     {
-      global: 123
-      text: 456
-      html: 789
+      global: r
+      text: "text_#{r}"
+      html: "html_#{r}"
     }
 
   headers: ->
     {
       newsgroup: Message.NEWSGROUP_DEFAULT
       message_id: @id()
-      boundary: 'TODO'
-      parent_msgid: ''          # TODO
+      boundary: crypto.pseudoRandomBytes(16).toString('hex')
+      parent_msgid: @parent_id()
       content_id: @content_id()
-      permalink: 'TODO'
+      permalink: "https://news.ycombinator.com/item?id=#{@json_data.id}"
       from: "#{@json_data.by} <noreply@example.com>"
     }
 

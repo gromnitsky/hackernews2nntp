@@ -8,7 +8,7 @@ Content-Type: multipart/alternative; boundary="{{ mail.boundary }}"
 Content-ID: {{ mail.content_id.global }}
 X-score: {{ score }}
 X-type: {{ type }}
-X-permalink: {{ mail.permalink }}
+X-permalink: {{{ mail.permalink }}}
 
 --{{ mail.boundary }}
 Content-ID: {{ mail.content_id.text }}
