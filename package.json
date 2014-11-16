@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "coffee-script": "~1.8.0",
+    "mocha": "~2.0.1",
+    "mustache": "~0.8.2"
+  }
+}
