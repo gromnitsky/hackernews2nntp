@@ -1,0 +1,48 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+		"id": {
+			"type": "integer",
+			"minimum": 1
+		},
+		"type": {
+			"type": "string",
+			"enum": ["job", "story", "comment", "poll", "pollopt"]
+		},
+		"by": {
+			"type": "string",
+			"minLength": 1
+		},
+		"time": {
+			"type": "integer",
+			"minimum": 0
+		},
+		"parent": {
+			"type": "integer",
+			"minimum": 1
+		},
+		"kids": {
+			"type": "array",
+			"items": {
+				"type": "integer",
+				"minimum": 1
+			}
+		},
+		"url": {
+			"type": "string",
+			"minLength": 10
+		},
+		"score": {
+			"type": "integer"
+		},
+		"parts": {
+			"type": "array",
+			"items": {
+				"type": "integer",
+				"minimum": 1
+			}
+		}
+    },
+    "required": ["id", "type", "by", "time"]
+}

@@ -4,6 +4,7 @@ crypto = require 'crypto'
 os = require 'os'
 
 Mustache = require 'mustache'
+json_schema = require('jjv')()
 
 class Message
 
@@ -12,8 +13,12 @@ class Message
   @TemplateGet = (name) ->
     fs.readFileSync(path.resolve __dirname, '..', 'template', "#{name}.txt").toString()
 
+  @SCHEMA = JSON.parse fs.readFileSync(path.join __dirname, 'schema.json').toString()
+
   constructor: (@json_data) ->
-    # TODO: validate @json_data
+    # sync validation
+    err = json_schema.validate Message.SCHEMA, @json_data
+    throw new Error('invalid json input: ' + JSON.stringify err) if err
 
   id: ->
     "#{@json_data.id}@news.ycombinator.com"
