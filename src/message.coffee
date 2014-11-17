@@ -11,16 +11,16 @@ Q = require 'q'
 class Message
 
   @NEWSGROUP_DEFAULT = 'news.ycombinator'
+  @SCHEMA = JSON.parse fs.readFileSync(path.join __dirname, 'schema.json').toString()
 
   @TemplateGet = (name) ->
     fs.readFileSync(path.resolve __dirname, '..', 'template', "#{name}.txt").toString()
 
-  @SCHEMA = JSON.parse fs.readFileSync(path.join __dirname, 'schema.json').toString()
-
-  constructor: (@json_data) ->
+  constructor: (@json_data, @parts = []) ->
     # sync validation
-    err = json_schema.validate Message.SCHEMA, @json_data
-    throw new Error('invalid json input: ' + JSON.stringify err) if err
+    for idx in @parts.concat(@json_data)
+      err = json_schema.validate Message.SCHEMA, idx
+      throw new Error('invalid json input: ' + JSON.stringify err) if err
 
   id: ->
     "#{@json_data.id}@news.ycombinator.com"
@@ -63,13 +63,13 @@ class Message
     }
 
   # return a promise
-  html_filter: ->
+  @HTML_filter: (html) ->
     deferred = Q.defer()
-    html = ''
+    text = ''
     stderr = ''
 
-    if (@json_data.type != 'comment') && (@json_data.type != 'pollopt')
-      deferred.resolve html
+    if !html? || html == ""
+      deferred.resolve text
       return deferred.promise
 
     w3m = spawn 'w3m', ['-T', 'text/html', '-dump', '-I', 'UTF-8',
@@ -78,17 +78,30 @@ class Message
     w3m.on 'error', (err) ->
       deferred.reject(new Error "w3m exec failed: #{err.message}")
 
-    w3m.stdout.on 'data', (data) -> html += data
+    w3m.stdout.on 'data', (data) -> text += data
     w3m.stderr.on 'data', (data) -> stderr += data
 
     w3m.on 'close', (code) ->
       if code == 0
-        deferred.resolve html
+        deferred.resolve text
       else
         deferred.reject(new Error "w3m failed w/ exit code #{code}\nw3m stderr: #{stderr}")
 
-    w3m.stdin.write @json_data.text
+    w3m.stdin.write html
     w3m.stdin.end()
+
+    deferred.promise
+
+  polparts_collect: ->
+    deferred = Q.defer()
+    parts = []
+    idx = 0      # we cannot use idx value from 'for item,idx in @parts'
+    for item in @parts
+      Message.HTML_filter(item.text)
+      .then (r) =>
+        ++idx
+        parts.push r.trim()
+        deferred.resolve parts if idx == @parts.length
 
     deferred.promise
 
@@ -97,10 +110,16 @@ class Message
     json = JSON.parse JSON.stringify(@json_data) # omglol
     json.mail = @headers()
 
-    @html_filter()
-    .then (r) ->
-      json.mail.body_text = r.trim()
-      Mustache.render Message.TemplateGet(json.type), json
+    if @json_data.type == 'poll'
+      @polparts_collect()
+      .then (r) ->
+        json.mail.polparts = r
+        Mustache.render Message.TemplateGet(json.type), json
+    else
+      Message.HTML_filter @json_data.text
+      .then (r) ->
+        json.mail.body_text = r.trim()
+        Mustache.render Message.TemplateGet(json.type), json
 
   toString: ->
     @render()

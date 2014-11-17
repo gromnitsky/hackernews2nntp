@@ -30,8 +30,7 @@
 			}
 		},
 		"url": {
-			"type": "string",
-			"minLength": 10
+			"type": "string"
 		},
 		"score": {
 			"type": "integer"

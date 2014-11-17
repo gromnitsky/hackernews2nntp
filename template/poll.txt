@@ -1,0 +1,46 @@
+From: {{{ mail.from }}}
+Date: {{ mail.date }}
+Subject: {{ title }}
+Newsgroups: {{ mail.newsgroup }}
+Message-ID: {{ mail.message_id }}
+References: {{ mail.parent_msgid }}
+Mime-Version: 1.0
+Content-Type: multipart/alternative; boundary="{{ mail.boundary }}"
+Content-ID: {{ mail.content_id.global }}
+X-score: {{ score }}
+X-type: {{ type }}
+X-permalink: {{{ mail.permalink }}}
+
+--{{ mail.boundary }}
+Content-ID: {{ mail.content_id.text }}
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+
+{{ title }}
+{{#mail.polparts}}
+
+* {{{.}}}
+{{/mail.polparts}}
+
+Vote & discuss: {{{ mail.permalink }}}
+
+--{{ mail.boundary }}
+Content-ID: {{ mail.content_id.html }}
+Content-Transfer-Encoding: 8bit
+Content-Type: text/html; charset=utf-8
+
+<b>{{ title }}</b>
+
+<p>
+<ul>
+{{#mail.polparts}}
+  <li>{{{.}}}</li>
+{{/mail.polparts}}
+</ul>
+</p>
+
+<p>
+<a href="{{{ mail.permalink }}}">Vote & discuss</a>
+</p>
+
+--{{ mail.boundary }}--
