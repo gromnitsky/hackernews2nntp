@@ -2,9 +2,11 @@ fs = require 'fs'
 path = require 'path'
 crypto = require 'crypto'
 os = require 'os'
+{spawn} = require 'child_process'
 
 Mustache = require 'mustache'
 json_schema = require('jjv')()
+Q = require 'q'
 
 class Message
 
@@ -60,10 +62,45 @@ class Message
       date: @date()
     }
 
+  # return a promise
+  html_filter: ->
+    deferred = Q.defer()
+    html = ''
+    stderr = ''
+
+    if (@json_data.type != 'comment') && (@json_data.type != 'pollopt')
+      deferred.resolve html
+      return deferred.promise
+
+    w3m = spawn 'w3m', ['-T', 'text/html', '-dump', '-I', 'UTF-8',
+      '-O', 'UTF-8', '-cols', '72', '-no-graph']
+
+    w3m.on 'error', (err) ->
+      deferred.reject(new Error "w3m exec failed: #{err.message}")
+
+    w3m.stdout.on 'data', (data) -> html += data
+    w3m.stderr.on 'data', (data) -> stderr += data
+
+    w3m.on 'close', (code) ->
+      if code == 0
+        deferred.resolve html
+      else
+        deferred.reject(new Error "w3m failed w/ exit code #{code}\nw3m stderr: #{stderr}")
+
+    w3m.stdin.write @json_data.text
+    w3m.stdin.end()
+
+    deferred.promise
+
+  # return a promise
   render: ->
     json = JSON.parse JSON.stringify(@json_data) # omglol
     json.mail = @headers()
-    Mustache.render Message.TemplateGet(json.type), json
+
+    @html_filter()
+    .then (r) ->
+      json.mail.body_text = r.trim()
+      Mustache.render Message.TemplateGet(json.type), json
 
   toString: ->
     @render()
