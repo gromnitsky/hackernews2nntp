@@ -1,0 +1,29 @@
+#!/usr/bin/env coffee
+
+# Read json file & print mbox file to stdout
+
+fs = require 'fs'
+path = require 'path'
+Message = require '../src/message'
+mbox = require './mbox'
+
+if process.argv.length != 3
+  console.error "usage: #{path.basename process.argv[1]} file.json"
+  process.exit 1
+
+json_data = JSON.parse fs.readFileSync(process.argv[2]).toString()
+parts = []
+
+for idx in json_data.parts
+  file = path.join(path.dirname(process.argv[2]), "#{idx}.json")
+  parts.push JSON.parse fs.readFileSync(file).toString()
+
+m = new Message json_data, parts
+
+# see mbox(1)
+console.log mbox.prefix m.json_data
+
+m.render()
+.then (r) ->
+  console.log r.replace /\n((>*?)From .+)/g, '\n>$1'
+.done()
