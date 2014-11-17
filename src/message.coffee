@@ -94,6 +94,10 @@ class Message
 
   polparts_collect: ->
     deferred = Q.defer()
+    if @parts.length == 0
+      deferred.resolve []
+      return deferred.promise
+
     parts = []
     idx = 0      # we cannot use idx value from 'for item,idx in @parts'
     for item in @parts
@@ -106,7 +110,7 @@ class Message
     deferred.promise
 
   # return a promise
-  render: ->
+  render: (_tdd_hash) ->
     json = JSON.parse JSON.stringify(@json_data) # omglol
     json.mail = @headers()
 
@@ -114,11 +118,13 @@ class Message
       @polparts_collect()
       .then (r) ->
         json.mail.polparts = r
+        _tdd_hash.polparts = r if _tdd_hash
         Mustache.render Message.TemplateGet(json.type), json
     else
       Message.HTML_filter @json_data.text
       .then (r) ->
         json.mail.body_text = r.trim()
+        _tdd_hash.body_text = r.trim() if _tdd_hash
         Mustache.render Message.TemplateGet(json.type), json
 
   toString: ->
