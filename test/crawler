@@ -1,0 +1,53 @@
+#!/usr/bin/env coffee
+
+assert = require 'assert'
+fs = require 'fs'
+http = require 'http'
+url = require 'url'
+path = require 'path'
+
+Q = require 'q'
+
+Crawler = require '../src/crawler'
+
+# create a static http server
+server = http.createServer().listen 8123, 'localhost'
+server.on 'request', (req, res) ->
+  url_parts = url.parse req.url, true
+
+  if url_parts.pathname.match /^\/[0-9]+\.json$/
+    fs.readFile path.join('data/json', url_parts.pathname), (err, data) ->
+      if err
+        if err.code == 'ENOENT'
+          res.statusCode = 404
+        else
+          throw err
+      else
+        res.setHeader 'Content-Type', 'application/json'
+        res.setHeader 'Content-Length', data.length
+        res.write data
+
+      res.end()
+  else
+    res.statusCode = 404
+    res.end()
+
+
+# main
+
+start = 1
+planned = 44
+crawler = new Crawler "http://localhost:8123/%d.json", planned
+crawler.event.on 'finish', (stat) ->
+  crawler.log "\n#{stat}"
+  server.close()
+#  console.log crawler.stat.history
+
+crawler.event.on 'body', (body) ->
+  console.log body
+
+for n in [start..planned]
+  crawler.get_item n
+  .catch (err) ->
+    console.error err
+  .done()
