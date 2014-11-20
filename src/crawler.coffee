@@ -15,15 +15,17 @@ class Stat
     @invalid = 0                # invalid json
     @stale = 0                  # already in history
 
-    @job_cur = 0
-    @planned = 0
+    @job = {
+      cur: 0
+      planned: 0                # total number
+    }
     @history = {}
 
   total: ->
     @downloaded + @failed + @invalid
 
   finished: ->
-    (@total() == @planned) && (@planned != 0)
+    (@total() == @job.planned) && (@job.planned != 0)
 
   toString: ->
     "downloaded: #{@downloaded}, failed: #{@failed}, invalid: #{@invalid}, stale: #{@stale}, total: #{@total()}"
@@ -34,9 +36,9 @@ class Stat
 
 class Crawler
 
-  constructor: (@url_pattern, planned) ->
+  constructor: (@url_pattern, job_planned) ->
     @stat = new Stat()
-    @stat.planned = planned
+    @stat.job.planned = job_planned
 
     @log = console.error
     @headers = {
@@ -48,11 +50,11 @@ class Crawler
     util.format @url_pattern, id
 
   prefix: (id, level) ->
-    "j=#{@stat.job_cur}/l=#{level}/p=#{@stat.planned} #{@url(id)}"
+    "jc=#{@stat.job.cur}/l=#{level}/jp=#{@stat.job.planned} #{@url(id)}"
 
   # return a promise
   get_item: (id, level = 0, expected_type = null) ->
-    @stat.job_cur += 1
+    @stat.job.cur += 1
     prefix = @prefix id, level
     deferred = Q.defer()
     unless id
@@ -81,7 +83,7 @@ class Crawler
 
           if json.kids?.length > 0
             @log "#{prefix}: kids!"
-            @stat.planned += json.kids.length
+            @stat.job.planned += json.kids.length
             # RECURSION!
             @get_item(kid, level+1, expected_type) for kid in json.kids
 
@@ -130,7 +132,7 @@ class Crawler
       deferred.reject new Error "#{poll_id}: invalid poll w/o parts"
       return deferred.promise
 
-    @stat.planned += parts.length
+    @stat.job.planned += parts.length
 
     # collect results
     pollparts = []
