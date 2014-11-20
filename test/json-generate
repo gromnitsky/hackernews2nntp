@@ -1,0 +1,39 @@
+#!/usr/bin/env coffee
+
+# Create a bunch of mocking .json files simulating HN firebase data.
+
+fs = require 'fs'
+
+dir = 'data/json'
+try
+  fs.mkdirSync dir, '0755'
+catch
+  # -p
+
+process.chdir dir
+
+gen_story = (n) ->
+  json = JSON.stringify {id: n, kids: [100+n, 200+n, 300+n], type: 'story'}
+  fs.writeFileSync "#{n}.json", json
+
+gen_comment = (n) ->
+  json = JSON.stringify {id: n, type: 'comment'}
+  fs.writeFileSync "#{n}.json", json
+
+gen_poll = (n, parts_num, missing) ->
+  parts = (idx for idx in [n+1..n+parts_num])
+  for idx in parts
+    json = JSON.stringify {id: idx, type: 'pollopt'}
+    fs.writeFileSync "#{idx}.json", json
+
+  parts.push 300+n if missing
+  json = JSON.stringify {id: n, parts: parts, type: 'poll'}
+  fs.writeFileSync "#{n}.json", json
+
+
+gen_story idx for idx in [1..10]
+gen_comment idx for idx in [101..110]
+gen_comment idx for idx in [201..210]
+
+gen_poll 20, 2, true            # broken
+gen_poll 30, 2, false
