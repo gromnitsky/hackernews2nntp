@@ -1,7 +1,9 @@
 readline = require 'readline'
 path = require 'path'
+{spawn} = require 'child_process'
 
 program = require 'commander'
+shellquote = require 'shell-quote'
 
 meta = require './meta.json'
 Message = require './message'
@@ -9,7 +11,9 @@ mbox = require './mbox'
 
 conf =
   verbose: false
-  format: 'rnews'               # also: mbox
+  format: 'rnews'
+  cmd: ['sudo', 'rnews', '-N']
+  print: false
 
 warnx = (msg) ->
   console.error "#{path.basename process.argv[1]} warning: #{msg}"
@@ -22,13 +26,37 @@ wrap_mail = (message) ->
 
   message.render()
   .then (mail) ->
-    log "writing #{message.json_data.id}"
     if conf.format == 'rnews'
-      console.log "#! rnews #{mail.length + 1}"
-      console.log mail
+      runner message.json_data.id, "#! rnews #{mail.length + 1}\n#{mail}"
+    else if conf.format == 'mbox'
+      runner message.json_data.id, "#{mbox.prefix message.json_data}\n#{mbox.escape mail}"
     else
-      console.log mbox.prefix message.json_data
-      console.log mbox.escape mail
+      runner message.json_data.id, mail
+  .done()
+
+runner = (id, mail) ->
+  if conf.print
+    log "#{id}: writing"
+    console.log mail
+    return
+
+  text = ''
+  stderr = ''
+
+  log "#{id}: writing to `#{conf.cmd.join ' '}`"
+  cmd = spawn conf.cmd[0], conf.cmd[1..-1]
+
+  cmd.on 'error', (err) ->
+    warnx "#{id}: cmd failed: #{err.message}"
+
+  cmd.stdout.on 'data', (data) -> text += data
+  cmd.stderr.on 'data', (data) -> stderr += data
+
+  cmd.on 'close', (code) ->
+    log "#{id}: cmd exit code: #{code}"
+
+  cmd.stdin.write "#{mail}\n"
+  cmd.stdin.end()
 
 message_create = (json, parts = []) ->
   try
@@ -45,12 +73,18 @@ message_create = (json, parts = []) ->
 exports.main = ->
   program
     .version meta.version
-    .option '-v, --verbose', 'Print debug info to stderr'
+    .option '-v, --verbose', 'Print debug info to stderr',conf.verbose
+    .option '-p, --print', 'Just print the result to stdout', conf.print
     .option '-f, --format [format]', 'Convert to rnews batch (default) or mbox', conf.format
+    .option '--cmd [string]', 'Custom command instead of "sudo rnews -N"'
     .parse process.argv
 
   conf.format = program.format
   conf.verbose = program.verbose
+  conf.print = program.print
+
+  if program.cmd
+    conf.cmd = shellquote.parse program.cmd
 
   rl = readline.createInterface {
     input: process.stdin
