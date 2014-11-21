@@ -23,11 +23,11 @@ class Message
       throw new Error('invalid json input: ' + JSON.stringify err) if err
 
   id: ->
-    "#{@json_data.id}@news.ycombinator.com"
+    "<#{@json_data.id}@news.ycombinator.com>"
 
   parent_id: ->
     return '' unless @json_data.parent
-    "#{@json_data.parent}@news.ycombinator.com"
+    "<#{@json_data.parent}@news.ycombinator.com>"
 
   # return date in rfc2822 format
   date: ->

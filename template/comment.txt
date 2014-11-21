@@ -2,8 +2,8 @@ From: {{{ mail.from }}}
 Date: {{ mail.date }}
 Subject: {{ title }}
 Newsgroups: {{ mail.newsgroup }}
-Message-ID: {{ mail.message_id }}
-References: {{ mail.parent_msgid }}
+Message-ID: {{{ mail.message_id }}}
+References: {{{ mail.parent_msgid }}}
 Mime-Version: 1.0
 Content-Type: multipart/alternative; boundary="{{ mail.boundary }}"
 Content-ID: {{ mail.content_id.global }}
