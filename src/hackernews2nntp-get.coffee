@@ -26,6 +26,7 @@ exports.main = ->
     .version meta.version
     .option '-v, --verbose', 'Print HTTP status on stderr'
     .option '-u, --url-pattern [string]', "Default: #{conf.url_pattern}", conf.url_pattern
+    .option '--nokids', "Debug only"
     .parse process.argv
 
   if program.args.length < 1
@@ -46,6 +47,7 @@ exports.main = ->
   unless program.verbose
     crawler.log = ->
       # empty
+  crawler.look4kids = false if program.nokids
 
   crawler.event.on 'finish', (stat) ->
     crawler.log "\n#{stat}"

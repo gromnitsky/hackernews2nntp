@@ -45,6 +45,7 @@ class Crawler
       'User-Agent': 'get.coffee/0.0.1'
     }
     @event = new events.EventEmitter()
+    @look4kids = true
 
   url: (id) ->
     util.format @url_pattern, id
@@ -82,7 +83,7 @@ class Crawler
           deferred.resolve body
 
         # everyone except pollopt may have kids
-        if json.kids?.length > 0
+        if @look4kids & json.kids?.length > 0
           @log "#{prefix}: #{json.kids.length} kid(s)!"
           @stat.job.planned += json.kids.length
           # RECURSION!
@@ -137,16 +138,19 @@ class Crawler
 
     # collect results
     pollparts = []
+    promises = []
     for part,idx in parts
-      do (idx) =>
-        @get_item part, 1, 'pollopt'
-        .then (body) ->
-          pollparts.push body
-          if idx == parts.length-1
-            deferred.resolve(pollparts)
-        .catch (err) ->
-          deferred.reject new Error "#{poll_id}: poll is missing pollopt: #{err.message}"
-        .done()
+      pro = @get_item part, 1, 'pollopt'
+      promises.push pro
+      pro.then (body) ->
+        pollparts.push body
+      .catch (err) ->
+        deferred.reject new Error "#{poll_id}: poll is missing pollopt: #{err.message}"
+      .done()
+
+    Q.all(promises)
+    .then ->
+      deferred.resolve pollparts
 
     deferred.promise
 
