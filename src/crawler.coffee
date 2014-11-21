@@ -75,17 +75,18 @@ class Crawler
         @stat.history_add id
 
         if json.type == 'poll'
-          @log "#{prefix}: collecting pollopts"
+          @log "#{prefix}: collecting #{json.parts.length} pollopts"
           @get_fullpoll id, json.parts, body, deferred
         else
           @event.emit 'body', body unless json.type?.match /^poll/
           deferred.resolve body
 
-          if json.kids?.length > 0
-            @log "#{prefix}: kids!"
-            @stat.job.planned += json.kids.length
-            # RECURSION!
-            @get_item(kid, level+1, expected_type) for kid in json.kids
+        # everyone except pollopt may have kids
+        if json.kids?.length > 0
+          @log "#{prefix}: #{json.kids.length} kid(s)!"
+          @stat.job.planned += json.kids.length
+          # RECURSION!
+          @get_item(kid, level+1, expected_type) for kid in json.kids
 
       else # res.statusCode != 200
         @stat.failed += 1
