@@ -8,17 +8,21 @@ Message = require './message'
 mbox = require './mbox'
 
 conf =
-  verbose: 0
+  verbose: false
   format: 'rnews'               # also: mbox
 
 warnx = (msg) ->
   console.error "#{path.basename process.argv[1]} warning: #{msg}"
+
+log = (msg) ->
+  console.error "#{path.basename process.argv[1]}: #{msg}" if conf.verbose
 
 wrap_mail = (message) ->
   return unless message
 
   message.render()
   .then (mail) ->
+    log "writing #{message.json_data.id}"
     if conf.format == 'rnews'
       console.log "#! rnews #{mail.length + 1}"
       console.log mail
@@ -45,7 +49,8 @@ exports.main = ->
     .option '-f, --format [format]', 'Convert to rnews batch (default) or mbox', conf.format
     .parse process.argv
 
-  conf.format = process.format
+  conf.format = program.format
+  conf.verbose = program.verbose
 
   rl = readline.createInterface {
     input: process.stdin
@@ -85,3 +90,7 @@ exports.main = ->
     else
       message = message_create json
       wrap_mail message
+
+  process.stdout.on 'error', (err) ->
+    warnx "program you pipe in stopped reading input" if err.code == "EPIPE"
+    warnx err
