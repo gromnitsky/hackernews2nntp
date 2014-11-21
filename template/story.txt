@@ -1,6 +1,7 @@
+Path: {{ mail.path }}
 From: {{{ mail.from }}}
 Date: {{ mail.date }}
-Subject: {{ title }}
+Subject: {{{ title }}}{{^title}}(No subject){{/title}}
 Newsgroups: {{ mail.newsgroup }}
 Message-ID: {{{ mail.message_id }}}
 References: {{{ mail.parent_msgid }}}
@@ -16,7 +17,7 @@ Content-ID: {{ mail.content_id.text }}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain; charset=utf-8
 
-{{{ url }}}
+{{{ url }}}{{{ mail.body_text }}}
 
 Discussion: {{{ mail.permalink }}}
 
@@ -26,7 +27,7 @@ Content-Transfer-Encoding: 8bit
 Content-Type: text/html; charset=utf-8
 
 <p>
-  {{{ url }}}
+  {{{ url }}}{{{ text }}}
 </p>
 
 <p>

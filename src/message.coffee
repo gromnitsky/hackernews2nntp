@@ -60,6 +60,7 @@ class Message
       permalink: "https://news.ycombinator.com/item?id=#{@json_data.id}"
       from: "#{@json_data.by} <noreply@example.com>"
       date: @date()
+      path: os.hostname()
     }
 
   # return a promise

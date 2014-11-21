@@ -1,6 +1,7 @@
+Path: {{ mail.path }}
 From: {{{ mail.from }}}
 Date: {{ mail.date }}
-Subject: {{ title }}
+Subject: {{{ title }}}{{^title}}(No subject){{/title}}
 Newsgroups: {{ mail.newsgroup }}
 Message-ID: {{{ mail.message_id }}}
 References: {{{ mail.parent_msgid }}}
@@ -25,7 +26,9 @@ Content-ID: {{ mail.content_id.html }}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/html; charset=utf-8
 
+<div>
 {{{ text }}}
+</div>
 
 <p>
   <a href="{{{ mail.permalink }}}">Permalink</a>
