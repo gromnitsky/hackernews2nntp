@@ -5,7 +5,7 @@
 fs = require 'fs'
 path = require 'path'
 Message = require '../src/message'
-mbox = require './mbox'
+mbox = require '../src/mbox'
 
 if process.argv.length != 3
   console.error "usage: #{path.basename process.argv[1]} file.json"
@@ -25,5 +25,5 @@ console.log mbox.prefix m.json_data
 
 m.render()
 .then (r) ->
-  console.log r.replace /\n((>*?)From .+)/g, '\n>$1'
+  console.log mbox.escape r
 .done()

@@ -19,3 +19,7 @@ exports.prefix = (json_data) ->
     ].join ':'
     d.getUTCFullYear()
   ].join ' '
+
+# see mbox(1)
+exports.escape = (mail) ->
+  mail?.replace /\n((>*?)From .+)/g, '\n>$1'

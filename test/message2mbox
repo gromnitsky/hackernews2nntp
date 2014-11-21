@@ -4,7 +4,7 @@
 
 fs = require 'fs'
 Message = require '../src/message'
-mbox = require './mbox'
+mbox = require '../src/mbox'
 
 stdin = fs.readFileSync('/dev/stdin').toString()
 m = new Message JSON.parse(stdin)
@@ -14,5 +14,5 @@ console.log mbox.prefix m.json_data
 
 m.render()
 .then (r) ->
-  console.log r.replace /\n((>*?)From .+)/g, '\n>$1'
+  console.log mbox.escape r
 .done()
