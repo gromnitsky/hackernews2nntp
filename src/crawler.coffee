@@ -6,7 +6,7 @@ path = require 'path'
 request = require 'request'
 Q = require 'q'
 
-meta = JSON.parse fs.readFileSync(path.join __dirname, 'meta.json').toString()
+meta = require './meta.json'
 
 class Stat
 

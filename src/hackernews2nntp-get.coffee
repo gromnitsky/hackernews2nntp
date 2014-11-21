@@ -2,7 +2,7 @@ fs = require 'fs'
 path = require 'path'
 
 Crawler = require './crawler'
-meta = JSON.parse fs.readFileSync(path.join __dirname, 'meta.json').toString()
+meta = require './meta.json'
 
 program = require 'commander'
 
