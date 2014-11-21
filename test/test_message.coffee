@@ -14,7 +14,7 @@ suite 'Message', ->
     assert headers.permalink.match /^https:\/\/news.ycombinator.com\/item\?id=\d+/
     assert headers.from.match /^.+ <noreply@example.com>$/
 
-    assert headers.message_id.match /^\d+@news.ycombinator.com$/
+    assert headers.message_id.match /^<\d+@news.ycombinator.com>$/
     assert.equal '', headers.parent_msgid
 
     assert headers.date.match /^[A-Za-z]+, [0-9]+ [A-Za-z]+ \d+ \d+:\d+:\d+ GMT$/
