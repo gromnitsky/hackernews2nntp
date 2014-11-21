@@ -2,14 +2,10 @@
 
 ## Features
 
-* 0 configuration
+* No configuration files
 * CLI
 * Compatible w/ crone jobs
 * MIME `multipart/alternative` mails w/ html & txt portions
-
-
-## Disadvantages
-
 * Read-only
 * No up-voting support or score updates
 
@@ -33,26 +29,27 @@ Add this to sudoers (replacing `alex` w/ your user name):
 
 Then
 
-	# npm -g install hackernews2uucp
+	# npm -g install hackernews2nntp
 
 
 ### Check your local inn
 
 	# /usr/libexec/news/ctlinnd newgroup news.ycombinator
 
-must not raise error.
+must not raise an error.
 
 Then
 
-	$ hackernews2uucp-test
+	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert -f mbox > 1.mbox
 
-will just print a test message (in uncompressed UUCP batch format) to
-stdout.
+will download a HN comment & convert it to mbox format. If you have mutt
+installed, you can view if via `mutt -f 1.box`.
 
-	$ hackernews2uucp-test | sudo rnews -N
+	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert | sudo rnews -N
 
-will post a test message to `news.ycombinator` group. If the message
-doesn't appear, run
+will post the same comment to `news.ycombinator` group. If the message
+didn't appear (because it's too old (Apr 2007) for a default INN
+settings), run
 
 	$ journalctl /bin/rnews
 	$ journalctl -u innd
@@ -63,14 +60,18 @@ doesn't appear, run
 Wait indefinitely for a data from Hacker News & post it to a local nntp
 server:
 
-	$ hackernews2uucp -v | sudo rnews -N
+	$ hackernews2nnpt-get realtime -v | hackernews2nntp-convert | sudo rnews -N
 
 `-v` will print to stderr some info about arriving stories/comments/etc.
 Press `<Ctrl-C>` to exit.
 
 Get top 100 stories & all comments for them, then exit:
 
-	$ hackernews2uucp -cv | sudo rnews -N
+	$ hackernews2nnpt-get top100 -v | hackernews2nntp-convert | sudo rnews -N
+
+Get last 200 stories/comments, then exit:
+
+	$ hackernews2nnpt-get last 200 -v | hackernews2nntp-convert | sudo rnews -N
 
 
 ## FAQ
@@ -80,14 +81,17 @@ Get top 100 stories & all comments for them, then exit:
 	Please, don't ask me any questions about INN. I have a very vague
 	idea how it works.
 
-1. _Can hackernews2uucp run as a daemon?_
+1. _Can hackernews2nntp run as a daemon?_
 
 	No.
 
 
 ## Bugs
 
-* Tested only on Fedora 21.
+* Barely tested on Fedora 21 only.
+* Don't follow 'parent' property, e.g. if it gets a comment, it tries to
+  download all its 'kids', but ignores the 'parent'.
+* `src/crawler.coffee` is ugly.
 
 
 ## See Also
