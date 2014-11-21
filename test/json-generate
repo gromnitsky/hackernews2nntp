@@ -4,7 +4,8 @@
 
 fs = require 'fs'
 
-dir = 'data/json'
+dir = if process.argv[2] then process.argv[2] else 'data/json'
+
 try
   fs.mkdirSync dir, '0755'
 catch
@@ -30,6 +31,8 @@ gen_poll = (n, parts_num, missing) ->
   json = JSON.stringify {id: n, parts: parts, type: 'poll'}
   fs.writeFileSync "#{n}.json", json
 
+
+console.log "Output dir: #{dir}"
 
 gen_story idx for idx in [1..10]
 gen_comment idx for idx in [101..110]
