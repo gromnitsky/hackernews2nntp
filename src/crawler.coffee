@@ -1,8 +1,12 @@
 util = require 'util'
 events = require 'events'
+fs = require 'fs'
+path = require 'path'
 
 request = require 'request'
 Q = require 'q'
+
+meta = JSON.parse fs.readFileSync(path.join __dirname, 'meta.json').toString()
 
 class Stat
 
@@ -42,7 +46,7 @@ class Crawler
 
     @log = console.error
     @headers = {
-      'User-Agent': 'get.coffee/0.0.1'
+      'User-Agent': [meta.name, meta.version].join '/'
     }
     @event = new events.EventEmitter()
     @look4kids = true
