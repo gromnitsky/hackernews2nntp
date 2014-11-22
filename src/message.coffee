@@ -58,7 +58,7 @@ class Message
       parent_msgid: @parent_id()
       content_id: @content_id()
       permalink: "https://news.ycombinator.com/item?id=#{@json_data.id}"
-      from: "#{@json_data.by} <noreply@example.com>"
+      from: "#{@json_data.by} <#{@json_data.by}@example.com>"
       date: @date()
       path: os.hostname()
     }
