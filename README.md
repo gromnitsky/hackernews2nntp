@@ -1,5 +1,7 @@
 # Post Hacker News Stories & Comments to NNTP Server
 
+Or how to read HN offline.
+
 ## Features
 
 * No configuration files
@@ -9,6 +11,7 @@
 * Read-only
 * No up-voting support or score updates
 
+![A screenshot of running mutt](https://raw.github.com/gromnitsky/hackernews2nntp/master/screenshot1.png)
 
 ## Requirements
 
@@ -27,9 +30,9 @@ Add this to sudoers (replacing `alex` w/ your user name):
 
 	alex ALL = (news) NOPASSWD: /bin/rnews
 
-Then
+Then in the cloned repo:
 
-	# npm -g install hackernews2nntp
+	$ make
 
 
 ### Check your local inn
