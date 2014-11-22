@@ -27,7 +27,7 @@ wrap_mail = (message) ->
   message.render()
   .then (mail) ->
     if conf.format == 'rnews'
-      runner message.json_data.id, "#! rnews #{mail.length + 1}\n#{mail}"
+      runner message.json_data.id, "#! rnews #{Buffer.byteLength(mail) + 1}\n#{mail}"
     else if conf.format == 'mbox'
       runner message.json_data.id, "#{mbox.prefix message.json_data}\n#{mbox.escape mail}"
     else
