@@ -40,12 +40,12 @@ must not raise an error.
 
 Then
 
-	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert -v -f mbox -p > 1.mbox
+	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert -v -f mbox > 1.mbox
 
 will download a HN comment & convert it to mbox format. If you have mutt
 installed, you can view if via `mutt -f 1.box`.
 
-	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert -vp | sudo rnews -N
+	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert -v | sudo rnews -N
 
 will post the same comment to `news.ycombinator` group. If the message
 didn't appear (because it's too old (Apr 2007) for a default INN
@@ -57,21 +57,13 @@ settings), run
 
 ## Usage
 
-Wait indefinitely for a data from Hacker News & post it to a local nntp
-server:
-
-	$ hackernews2nnpt-get realtime -v | hackernews2nntp-convert -v -f plain
-
-`-v` will print to stderr some info about arriving stories/comments/etc.
-Press `<Ctrl-C>` to exit.
-
 Get top 100 stories & all comments for them, then exit:
 
-	$ hackernews2nnpt-get top100 -v | hackernews2nntp-convert -v -f plain
+	$ hackernews2nnpt-get top100 -v | hackernews2nntp-convert -v | sudo rnews -N
 
 Get last 200 stories/comments, then exit:
 
-	$ hackernews2nnpt-get last 200 -v | hackernews2nntp-convert -v -f plain
+	$ hackernews2nnpt-get last 200 -v | hackernews2nntp-convert -v | sudo rnews -N
 
 
 ## FAQ
@@ -89,6 +81,7 @@ Get last 200 stories/comments, then exit:
 ## Bugs
 
 * Barely tested on Fedora 21 only.
+* Supports only UTF-8 locale.
 * Don't follow 'parent' property, e.g. if it gets a comment, it tries to
   download all its 'kids', but ignores the 'parent'.
 * `src/crawler.coffee` is ugly.
