@@ -25,6 +25,8 @@ ids_get = (mode, spec) ->
 
   if mode == 'last'
     return ids_last spec
+  if mode == 'top100'
+    return ids_top100()
   else
     return Q.fcall -> throw new Error "invalid mode #{conf.mode}"
 
@@ -43,7 +45,9 @@ ids_last = (spec) ->
       return
     if res.statusCode == 200
       maxitem = parseInt(body) || 0
-      deferred.reject new Error "mode last: maxitem <= 0" if maxitem < 1
+      if maxitem < 1
+        deferred.reject new Error "mode last: maxitem <= 0"
+        return
 
       result = maxitem-num
       if result < 1
@@ -55,14 +59,36 @@ ids_last = (spec) ->
 
   deferred.promise
 
+# return a promise
+ids_top100 = ->
+  deferred = Q.defer()
+  opt = { url: 'https://hacker-news.firebaseio.com/v0/topstories.json' }
+  request.get opt, (err, res, body) ->
+    if err
+      deferred.reject new Error "mode top100: #{err.message}"
+      return
+    if res.statusCode == 200
+      try
+        arr = JSON.parse body
+        throw new Error 'array is required' unless (arr instanceof Array)
+      catch err
+        deferred.reject new Error "mode top100: invalid json: #{err.message}"
+        return
+
+      deferred.resolve arr
+    else
+      deferred.reject new Error "mode top100: HTTP #{res.statusCode}"
+
+  deferred.promise
+
 exports.main = ->
 
   program
     .version meta.version
     .usage "[options] mode [spec]
-    \n  Available modes: top100, last [number], exact [id]"
+    \n  Available modes: top100, last <number>, exact <id>"
     .option '-v, --verbose', 'Print HTTP status on stderr'
-    .option '-u, --url-pattern [string]', "Debug. Only for 'exact' mode. Default: #{conf.url_pattern}", conf.url_pattern
+    .option '-u, --url-pattern <string>', "Debug. Only for 'exact' mode. Default: #{conf.url_pattern}", conf.url_pattern
     .option '--nokids', "Debug"
     .parse process.argv
 
