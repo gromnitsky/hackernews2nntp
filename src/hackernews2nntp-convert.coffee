@@ -4,6 +4,7 @@ path = require 'path'
 
 program = require 'commander'
 shellquote = require 'shell-quote'
+which = require 'which'
 
 meta = require './meta.json'
 Message = require './message'
@@ -14,11 +15,17 @@ conf =
   format: 'rnews'
   cmd: ['sudo', 'rnews', '-N']
   destination: 'printer'
+  ext_deps: []
+
 
 
 
 warnx = (msg) ->
   console.error "#{path.basename process.argv[1]} warning: #{msg}"
+
+errx = (msg) ->
+  console.error "#{path.basename process.argv[1]} error: #{msg}"
+  process.exit 1
 
 log = (msg) ->
   console.error "#{path.basename process.argv[1]}: #{msg}" if conf.verbose
@@ -77,6 +84,16 @@ message_create = (json, parts = []) ->
 
   message
 
+ext_deps = -> ['w3m', conf.cmd[0]]
+
+ext_deps_check = ->
+  for idx in ext_deps()
+    try
+      which.sync idx
+    catch e
+      errx "#{idx} not found in PATH"
+
+
 
 
 exports.main = ->
@@ -92,6 +109,8 @@ exports.main = ->
   conf.destination = 'fork' if program.fork
   conf.format = program.format  if program.format
   conf.cmd = shellquote.parse program.cmd if program.cmd
+
+  ext_deps_check()
 
   rl = readline.createInterface {
     input: process.stdin
@@ -134,5 +153,4 @@ exports.main = ->
 
   process.stdout.on 'error', (err) ->
     warnx "program you pipe in stopped reading input" if err.code == "EPIPE"
-    warnx err
-    process.exit 1
+    errx err
