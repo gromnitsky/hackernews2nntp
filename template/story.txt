@@ -27,12 +27,12 @@ Content-ID: {{ mail.content_id.html }}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/html; charset=utf-8
 
-<p>
-  {{{ url }}}{{{ text }}}
-</p>
+<div>
+  <a href="{{{ url }}}">{{{ url }}}</a>{{{ text }}}
+</div>
 
 <p>
-  Discussion: {{{ mail.permalink }}}
+  <a href="{{{ mail.permalink }}}">Discussion</a>
 </p>
 
 --{{ mail.boundary }}--
