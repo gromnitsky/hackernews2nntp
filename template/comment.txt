@@ -11,6 +11,7 @@ Content-ID: {{ mail.content_id.global }}
 X-score: {{ score }}
 X-type: {{ type }}
 X-permalink: {{{ mail.permalink }}}
+X-user-profile: {{{ mail.profile }}}
 
 --{{ mail.boundary }}
 Content-ID: {{ mail.content_id.text }}

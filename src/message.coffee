@@ -61,6 +61,7 @@ class Message
       from: "#{@json_data.by} <#{@json_data.by}@example.com>"
       date: @date()
       path: os.hostname()
+      profile: "https://news.ycombinator.com/user?id=#{@json_data.by}"
     }
 
   # return a promise

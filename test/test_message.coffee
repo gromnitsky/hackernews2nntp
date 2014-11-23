@@ -13,6 +13,7 @@ suite 'Message', ->
     assert headers.boundary.match /^[0-9a-z]+$/
     assert headers.permalink.match /^https:\/\/news.ycombinator.com\/item\?id=\d+/
     assert headers.from.match /^.+ <.+@example.com>$/
+    assert headers.profile.match /^https:\/\/news.ycombinator.com\/user\?id=.+/
 
     assert headers.message_id.match /^<\d+@news.ycombinator.com>$/
     assert.equal '', headers.parent_msgid
