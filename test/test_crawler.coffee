@@ -47,7 +47,8 @@ suite 'Crawler', ->
 #      crawler.log "\n#{stat}"
       server.close()
 
-      assert.equal 39, crawler.stat.downloaded
+      assert.equal 39, crawler.stat.downloaded.files
+      assert.equal 1271, crawler.stat.downloaded.bytes
       assert.equal 40, crawler.stat.failed
       assert.equal 0, crawler.stat.invalid
       assert.equal 0, crawler.stat.stale

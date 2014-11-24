@@ -14,7 +14,9 @@ class Stat
     @reset()
 
   reset: ->
-    @downloaded = 0             # ok
+    @downloaded =
+      files: 0                  # ok
+      bytes: 0                  # may include @failed
     @failed = 0                 # connection/http error
     @invalid = 0                # invalid json
     @stale = 0                  # already in history
@@ -26,16 +28,17 @@ class Stat
     @history = {}
 
   total: ->
-    @downloaded + @failed + @invalid
+    @downloaded.files + @failed + @invalid
 
   finished: ->
     (@total() == @job.planned) && (@job.planned != 0)
 
   toString: ->
-    "downloaded: #{@downloaded}, failed: #{@failed}, invalid: #{@invalid}, stale: #{@stale}, total: #{@total()}"
+    "downloaded files/bytes: #{@downloaded.files}/#{@downloaded.bytes}, failed: #{@failed}, invalid: #{@invalid}, stale: #{@stale}, total: #{@total()}"
 
-  history_add: (id) ->
-    @downloaded += 1
+  history_add: (id, body = "") ->
+    @downloaded.files += 1
+    @downloaded.bytes += Buffer.byteLength body
     @history[id] = true
 
 class Crawler
@@ -77,7 +80,7 @@ class Crawler
         @log "#{prefix}: HTTP 200"
 
         return unless (json = @parse_body body, deferred)
-        @stat.history_add id
+        @stat.history_add id, body
 
         if json.type == 'poll'
           @log "#{prefix}: collecting #{json.parts.length} pollopts"
@@ -128,7 +131,7 @@ class Crawler
     .catch (err) =>
       # poll is broken, because one of its pollopts is broken/missing
       @stat.failed += 1
-      @stat.downloaded -= 1
+      @stat.downloaded.files -= 1
       promise.reject err
     .done()
 
