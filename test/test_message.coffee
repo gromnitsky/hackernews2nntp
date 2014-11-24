@@ -20,9 +20,9 @@ suite 'Message', ->
 
     assert headers.date.match /^[A-Za-z]+, [0-9]+ [A-Za-z]+ \d+ \d+:\d+:\d+ GMT$/
 
-    assert headers.content_id.global.match /^\d+_[0-9a-z]+@.+$/
-    assert headers.content_id.text.match /^text_\d+_[0-9a-z]+@.+$/
-    assert headers.content_id.html.match /^html_\d+_[0-9a-z]+@.+$/
+    assert headers.content_id.global.match /^<\d+_[0-9a-z]+@.+>$/
+    assert headers.content_id.text.match /^<text_\d+_[0-9a-z]+@.+>$/
+    assert headers.content_id.html.match /^<html_\d+_[0-9a-z]+@.+>$/
 
   test 'comment text filtered by w3m', (iamdone) ->
     comment = new Message(JSON.parse fs.readFileSync('data/comments/2921983.json'))

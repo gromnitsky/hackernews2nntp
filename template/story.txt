@@ -7,14 +7,14 @@ Message-ID: {{{ mail.message_id }}}
 References: {{{ mail.parent_msgid }}}
 Mime-Version: 1.0
 Content-Type: multipart/alternative; boundary="{{ mail.boundary }}"
-Content-ID: {{ mail.content_id.global }}
+Content-ID: {{{ mail.content_id.global }}}
 X-score: {{ score }}
 X-type: {{ type }}
 X-permalink: {{{ mail.permalink }}}
 X-user-profile: {{{ mail.profile }}}
 
 --{{ mail.boundary }}
-Content-ID: {{ mail.content_id.text }}
+Content-ID: {{{ mail.content_id.text }}}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain; charset=utf-8
 
@@ -23,7 +23,7 @@ Content-Type: text/plain; charset=utf-8
 Discussion: {{{ mail.permalink }}}
 
 --{{ mail.boundary }}
-Content-ID: {{ mail.content_id.html }}
+Content-ID: {{{ mail.content_id.html }}}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/html; charset=utf-8
 

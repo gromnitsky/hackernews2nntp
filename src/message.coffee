@@ -45,9 +45,9 @@ class Message
   content_id: ->
     r = "#{@json_data.time}_#{crypto.pseudoRandomBytes(8).toString('hex')}@#{os.hostname()}"
     {
-      global: r
-      text: "text_#{r}"
-      html: "html_#{r}"
+      global: "<#{r}>"
+      text: "<text_#{r}>"
+      html: "<html_#{r}>"
     }
 
   headers: ->
