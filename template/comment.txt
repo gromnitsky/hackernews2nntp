@@ -1,7 +1,7 @@
 Path: {{ mail.path }}
 From: {{{ mail.from }}}
 Date: {{ mail.date }}
-Subject: {{{ title }}}{{^title}}(No subject){{/title}}
+Subject: {{{ mail.subject }}}{{^title}}(No subject){{/title}}
 Newsgroups: {{ mail.newsgroup }}
 Message-ID: {{{ mail.message_id }}}
 References: {{{ mail.parent_msgid }}}

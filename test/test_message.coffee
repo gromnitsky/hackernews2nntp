@@ -24,6 +24,8 @@ suite 'Message', ->
     assert headers.content_id.text.match /^<text_\d+_[0-9a-z]+@.+>$/
     assert headers.content_id.html.match /^<html_\d+_[0-9a-z]+@.+>$/
 
+    assert headers.subject.match /^=\?UTF-8\?Q\?.+\?=$/
+
   test 'comment text filtered by w3m', (iamdone) ->
     comment = new Message(JSON.parse fs.readFileSync('data/comments/2921983.json'))
     results = {}

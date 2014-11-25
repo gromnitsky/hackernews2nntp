@@ -3,6 +3,7 @@
     "coffee-script": "~1.8.0",
     "commander": "~2.5.0",
     "jjv": "~1.0.2",
+    "mimelib": "~0.2.18",
     "mocha": "~2.0.1",
     "mustache": "~0.8.2",
     "q": "~1.1.1",

@@ -7,6 +7,7 @@ os = require 'os'
 Mustache = require 'mustache'
 json_schema = require('jjv')()
 Q = require 'q'
+mimelib = require 'mimelib'
 
 class Message
 
@@ -62,6 +63,7 @@ class Message
       date: @date()
       path: os.hostname()
       profile: "https://news.ycombinator.com/user?id=#{@json_data.by}"
+      subject: if !@json_data.title then '' else mimelib.encodeMimeWord @json_data.title
     }
 
   # return a promise
