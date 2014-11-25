@@ -1,13 +1,15 @@
 # Post Hacker News Stories & Comments to NNTP Server
 
-Or how to read HN offline.
+Or _how to read HN offline_.
 
 ## Features
 
+* Uses the official HN API
 * No configuration files
 * CLI
-* Compatible w/ crone jobs
+* Compatible w/ cron jobs
 * MIME `multipart/alternative` mails w/ html & txt portions
+* Stateless
 * Read-only
 * No up-voting support or score updates
 
@@ -58,7 +60,7 @@ settings), run
 	$ journalctl -u innd
 
 
-## Usage
+## Examples
 
 Get top 100 stories & all comments for them, then exit:
 
@@ -74,7 +76,12 @@ Get last 200 stories/comments, then exit:
 0. _I have a problem w/ rnews._
 
 	Please, don't ask me any questions about INN. I have a very vague
-	idea how it works.
+	idea how it works. I've chosen rnews because it (a) can read
+	articles form stdin in a batch mode, (b) doesn't modify the incoming
+	article, (c) fast, (d) comes w/ INN.
+
+	Unfortunately it's not possible to know 'was the article posted or
+	not' w/o reading INN logs.
 
 1. _Can hackernews2nntp run as a daemon?_
 
@@ -87,13 +94,14 @@ Get last 200 stories/comments, then exit:
 * Supports only UTF-8 locale.
 * Don't follow 'parent' property, e.g. if it gets a comment, it tries to
   download all its 'kids', but ignores the 'parent'.
-* `src/crawler.coffee` is ugly.
+* `src/crawler.coffee` is especially ugly.
 
 
 ## See Also
 
-[rnews(1)](http://www.eyrie.org/~eagle/software/inn/docs/rnews.html)
-
+[rnews(1)](http://www.eyrie.org/~eagle/software/inn/docs/rnews.html),
+[w3m(1)](http://manpages.ubuntu.com/manpages/utopic/en/man1/w3m.1.html),
+[sudoers(5)](http://www.sudo.ws/sudo/man/1.8.10/sudoers.man.html)
 
 ## TODO
 
