@@ -7,7 +7,7 @@ all:
 
 include mk/debug.mk
 include mk/readme.mk
-include mk/node-modules.mk
+include mk/node.mk
 include mk/src.mk
 
 all: node_modules $(html) compile
@@ -36,6 +36,8 @@ test    -- Run tests w/ mocha. Or
            $$ make test TEST_OPTS='-g pattern'
 
 compile -- compile src/ to lib/
+
+npm     -- Publish a package to npm registry
 endef
 
 .PHONY: help
