@@ -6,7 +6,7 @@ path = require 'path'
 request = require 'request'
 Q = require 'q'
 
-meta = require './meta.json'
+meta = require '../package.json'
 
 class Stat
 

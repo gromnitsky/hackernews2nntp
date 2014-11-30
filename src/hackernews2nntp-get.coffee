@@ -2,7 +2,7 @@ fs = require 'fs'
 path = require 'path'
 
 Crawler = require './crawler'
-meta = require './meta.json'
+meta = require '../package.json'
 
 program = require 'commander'
 Q = require 'q'

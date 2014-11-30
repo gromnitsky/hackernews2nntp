@@ -6,7 +6,7 @@ program = require 'commander'
 shellquote = require 'shell-quote'
 which = require 'which'
 
-meta = require './meta.json'
+meta = require '../package.json'
 Message = require './message'
 mbox = require './mbox'
 
