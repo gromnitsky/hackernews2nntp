@@ -36,6 +36,10 @@ Then in the cloned repo:
 
 	$ make
 
+or just
+
+	# npm install -g hackernews2nntp
+
 
 ### Check your local inn
 
@@ -64,11 +68,11 @@ settings), run
 
 Get top 100 stories & all comments for them, then exit:
 
-	$ hackernews2nnpt-get top100 -v | hackernews2nntp-convert -v | sudo rnews -N
+	$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v | sudo rnews -N
 
 Get last 200 stories/comments, then exit:
 
-	$ hackernews2nnpt-get last 200 -v | hackernews2nntp-convert -v | sudo rnews -N
+	$ hackernews2nntp-get last 200 -v | hackernews2nntp-convert -v | sudo rnews -N
 
 
 ## FAQ
