@@ -34,7 +34,7 @@ dispatcher = {
 
   printer: (id, mail) ->
     log "#{id}: writing"
-    console.log mail
+    process.stdout.write "#{mail}\n"
 
   fork: (id, mail) ->
     text = ''
