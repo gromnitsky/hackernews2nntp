@@ -1,4 +1,4 @@
-# Post Hacker News Stories & Comments to NNTP Server
+# Post Hacker News Stories & Comments to an NNTP Server
 
 Or _how to read HN offline_.
 
@@ -52,7 +52,7 @@ Then
 	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert -v -f mbox > 1.mbox
 
 will download a HN comment & convert it to mbox format. If you have mutt
-installed, you can view if via `mutt -f 1.box`.
+installed, you can view it via `mutt -f 1.box`.
 
 	$ hackernews2nntp-get exact 8874 -v | hackernews2nntp-convert -v | sudo rnews -N
 
@@ -66,13 +66,25 @@ settings), run
 
 ## Examples
 
-Get top 100 stories & all comments for them, then exit:
+1. Get top 100 stories & all comments for them, then exit:
 
 	$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v | sudo rnews -N
 
-Get last 200 stories/comments, then exit:
+	If you get an EPIPE error, don't pipe to rnews but try to invoke
+	`hackernews2nntp-conver` w/ `--fork` option:
+
+		$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v --fork
+
+	(It will call `sudo rnews -N` internally for each article.)
+
+2. Get last 200 stories/comments, then exit:
 
 	$ hackernews2nntp-get last 200 -v | hackernews2nntp-convert -v | sudo rnews -N
+
+3. Don't post anything to an NNTP server but create 1 big .mbox file:
+
+		$ rm 1.mbox
+		$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v -f mbox >> 1.mbox
 
 
 ## FAQ
@@ -105,7 +117,9 @@ Get last 200 stories/comments, then exit:
 
 [rnews(1)](http://www.eyrie.org/~eagle/software/inn/docs/rnews.html),
 [w3m(1)](http://manpages.ubuntu.com/manpages/utopic/en/man1/w3m.1.html),
+[mbox(5)](http://manpages.ubuntu.com/manpages/utopic/man5/mbox.5.html),
 [sudoers(5)](http://www.sudo.ws/sudo/man/1.8.10/sudoers.man.html)
+
 
 ## TODO
 
