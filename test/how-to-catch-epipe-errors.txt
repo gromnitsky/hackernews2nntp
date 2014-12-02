@@ -1,0 +1,12 @@
+  $ curl https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty > top100
+
+Make top100 file look like
+
+8686076
+8683649
+8680625
+...
+
+  $ for i in `cat top100`; do echo $i; hackernews2nntp-get exact $i | hackernews2nntp-convert | sudo rnews -N; done
+
+Will tell which thread confuses rnews.
