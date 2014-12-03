@@ -66,7 +66,7 @@ settings), run
 
 ## Examples
 
-1. Get top 100 stories & all comments for them, then exit:
+0. Get top 100 stories & all comments for them, then exit:
 
 	$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v | sudo rnews -N
 
@@ -77,11 +77,11 @@ settings), run
 
 	(It will call `sudo rnews -N` internally for each article.)
 
-2. Get last 200 stories/comments, then exit:
+1. Get last 200 stories/comments, then exit:
 
-	$ hackernews2nntp-get last 200 -v | hackernews2nntp-convert -v | sudo rnews -N
+		$ hackernews2nntp-get last 200 -v | hackernews2nntp-convert -v | sudo rnews -N
 
-3. Don't post anything to an NNTP server but create 1 big .mbox file:
+2. Don't post anything to an NNTP server but create 1 big .mbox file:
 
 		$ rm 1.mbox
 		$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v -f mbox >> 1.mbox
@@ -102,6 +102,33 @@ settings), run
 1. _Can hackernews2nntp run as a daemon?_
 
 	No.
+
+2. _What does `hackernews2nntp-convert warning: json validation failed`
+   message mean?_
+
+	Usually it means that a HN post was deleted & there was no usefull
+    data in the json payload. For example,
+
+		$ hackernews2nntp-get exact 126809 | json -g -c 'this.deleted'
+		[
+		  {
+			"deleted": true,
+			"id": 127217
+		  }
+		]
+
+	vs.
+
+		$ hackernews2nntp-get exact 126809 | json -g \
+			-c '!this.kids && this.by == "pg" && this.type == "comment"' | json 0
+		{
+		  "by": "pg",
+		  "id": 126816,
+		  "parent": 126809,
+		  "text": "As you can see, we do.  You can read more [...]",
+		  "time": 1204404016,
+		  "type": "comment"
+		}
 
 
 ## Bugs
