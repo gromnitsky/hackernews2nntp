@@ -14,12 +14,15 @@ catch
 process.chdir dir
 
 gen_story = (n) ->
-  json = JSON.stringify {id: n, kids: [100+n, 200+n, 300+n], type: 'story'}
+  json = JSON.stringify {id: n, kids: [100+n, 100+n, 200+n, 300+n, 500+n], type: 'story'}
   fs.writeFileSync "#{n}.json", json
 
 gen_comment = (n) ->
   json = JSON.stringify {id: n, type: 'comment'}
   fs.writeFileSync "#{n}.json", json
+
+gen_comment_invalid_json = (n) ->
+  fs.writeFileSync "#{n}.json", "#{n}: invalid json"
 
 gen_poll = (n, parts_num, missing) ->
   parts = (idx for idx in [n+1..n+parts_num])
@@ -37,6 +40,7 @@ console.log "Output dir: #{dir}"
 gen_story idx for idx in [1..10]
 gen_comment idx for idx in [101..110]
 gen_comment idx for idx in [201..210]
+gen_comment_invalid_json idx for idx in [501..510]
 
 gen_poll 20, 2, true            # broken
 gen_poll 30, 2, false

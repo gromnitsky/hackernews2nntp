@@ -44,15 +44,15 @@ suite 'Crawler', ->
     crawler.log = ->
 
     crawler.event.on 'finish', (stat) ->
-#      crawler.log "\n#{stat}"
+#      console.log "\n#{stat}"
       server.close()
 
       assert.equal 39, crawler.stat.downloaded.files
-      assert.equal 1271, crawler.stat.downloaded.bytes
+      assert.equal 1351, crawler.stat.downloaded.bytes
       assert.equal 40, crawler.stat.failed
-      assert.equal 0, crawler.stat.invalid
-      assert.equal 0, crawler.stat.stale
-      assert.equal 79, crawler.stat.total()
+      assert.equal 10, crawler.stat.invalid
+      assert.equal 10, crawler.stat.stale
+      assert.equal 99, crawler.stat.total()
 
 #      console.log errors
       assert.equal 29, errors.length

@@ -41,7 +41,7 @@ crawler = new Crawler "http://localhost:8123/%d.json", planned
 crawler.event.on 'finish', (stat) ->
   crawler.log "\n#{stat}"
   server.close()
-#  console.log crawler.stat.history
+  console.log crawler.stat.history_pending_request
 
 crawler.event.on 'body', (body) ->
   console.log body

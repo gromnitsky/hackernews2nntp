@@ -26,9 +26,10 @@ class Stat
       planned: 0                # total number
     }
     @history = {}
+    @history_pending_request = {}
 
   total: ->
-    @downloaded.files + @failed + @invalid
+    @downloaded.files + @failed + @invalid + @stale
 
   finished: ->
     (@total() == @job.planned) && (@job.planned != 0)
@@ -60,6 +61,9 @@ class Crawler
   prefix: (id, level) ->
     "jc=#{@stat.job.cur}/l=#{level}/jp=#{@stat.job.planned} #{@url(id)}"
 
+  finish_check: ->
+    @event.emit 'finish', @stat if @stat.finished()
+
   # return a promise
   get_item: (id, level = 0, expected_type = null) ->
     @stat.job.cur += 1
@@ -67,57 +71,64 @@ class Crawler
     deferred = Q.defer()
     unless id
       deferred.reject new Error "no id, cannot do HTTP GET"
+      @finish_check()
       return deferred.promise
 
-    request.get {url: @url(id), headers: @headers}, (err, res, body) =>
+    cur_req = request.get {url: @url(id), headers: @headers}, (err, res, body) =>
       if err
         @stat.failed += 1
         @log "#{prefix}: Error: #{err.message}"
         deferred.reject new Error "#{id}: #{err.message}"
+        @finish_check()
         return
 
       if res.statusCode == 200
         @log "#{prefix}: HTTP 200"
 
-        return unless (json = @parse_body body, deferred)
-        @stat.history_add id, body
+        json = @parse_body id, body, deferred
+        if json
+          @stat.history_add id, body
 
-        if json.type == 'poll'
-          @log "#{prefix}: collecting #{json.parts.length} pollopts"
-          @get_fullpoll id, json.parts, body, deferred
-        else
-          @event.emit 'body', body unless json.type?.match /^poll/
-          deferred.resolve body
+          if json.type == 'poll'
+            @log "#{prefix}: collecting #{json.parts.length} pollopts"
+            @get_fullpoll id, json.parts, body, deferred
+          else
+            @event.emit 'body', body unless json.type?.match /^poll/
+            deferred.resolve body
 
-        # everyone except pollopt may have kids
-        if @look4kids & json.kids?.length > 0
-          @log "#{prefix}: #{json.kids.length} kid(s)!"
-          @stat.job.planned += json.kids.length
-          # RECURSION!
-          @get_item(kid, level+1, expected_type) for kid in json.kids
+          # everyone except pollopt may have kids
+          if @look4kids & json.kids?.length > 0
+            @log "#{prefix}: #{json.kids.length} kid(s)!"
+            @stat.job.planned += json.kids.length
+            # RECURSION!
+            @get_item(kid, level+1, expected_type) for kid in json.kids
 
       else # res.statusCode != 200
         @stat.failed += 1
         @log "#{prefix}: HTTP #{res.statusCode}"
         deferred.reject new Error "#{id}: HTTP #{res.statusCode}"
 
-      @event.emit 'finish', @stat if @stat.finished()
+      @finish_check()
 
     .on 'request', (req) =>
-      if @stat.history[id] == true && expected_type != 'pollopt'
+      if (@stat.history[id] == true || @stat.history_pending_request[id] == true) &&
+          expected_type != 'pollopt'
         @stat.stale += 1
+        @log "#{prefix}: aborted HTTP GET"
+        cur_req.abort()
         deferred.reject new Error "#{id}: saw it already"
-        return deferred.promise
-      @log "#{prefix}: HTTP GET"
+      else
+        @stat.history_pending_request[id] = true
+        @log "#{prefix}: HTTP GET"
 
     deferred.promise
 
-  parse_body: (body, promise) ->
+  parse_body: (id, body, promise) ->
     try
       return JSON.parse body
     catch e
-      @stat.failed += 1
-      promise.reject new Error 'invalid json'
+      @stat.invalid += 1
+      promise.reject new Error "#{id}: invalid json"
 
     null
 
