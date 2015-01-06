@@ -14,10 +14,25 @@ class Message
   @NEWSGROUP_DEFAULT = 'news.ycombinator'
   @SCHEMA = JSON.parse fs.readFileSync(path.join __dirname, 'schema.json').toString()
 
-  @TemplateGet = (name) ->
-    fs.readFileSync(path.resolve __dirname, '..', 'template', "#{name}.txt").toString()
+  @TemplateGet = (name, alt_dir = '') ->
+    dirs = [path.resolve(__dirname, '..', 'template')]
+    dirs.unshift alt_dir if alt_dir
+
+    result = null
+    err = null
+    for idx in dirs
+      try
+        result = fs.readFileSync(path.join idx, "#{name}.txt").toString()
+        err = null
+        break
+      catch e
+        err = e
+
+    return result unless err
+    throw err
 
   constructor: (@json_data, @parts = []) ->
+    @opt = {}
     # sync validation
     for idx in @parts.concat(@json_data)
       err = json_schema.validate Message.SCHEMA, idx
@@ -120,16 +135,16 @@ class Message
 
     if @json_data.type == 'poll'
       @polparts_collect()
-      .then (r) ->
+      .then (r) =>
         json.mail.polparts = r
         _tdd_hash.polparts = r if _tdd_hash
-        Mustache.render Message.TemplateGet(json.type), json
+        Mustache.render Message.TemplateGet(json.type, @opt.alt_dir), json
     else
       Message.HTML_filter @json_data.text
-      .then (r) ->
+      .then (r) =>
         json.mail.body_text = r.trim()
         _tdd_hash.body_text = r.trim() if _tdd_hash
-        Mustache.render Message.TemplateGet(json.type), json
+        Mustache.render Message.TemplateGet(json.type, @opt.alt_dir), json
 
   toString: ->
     @render()

@@ -16,6 +16,7 @@ conf =
   cmd: ['sudo', 'rnews', '-N']
   destination: 'printer'
   ext_deps: []
+  template_dir: null
 
 
 
@@ -75,6 +76,7 @@ wrap_mail = (message) ->
 message_create = (json, parts = []) ->
   try
     message = new Message json, parts
+    message.opt.alt_dir = conf.template_dir
   catch err
     if err.message.match /invalid json input/
       warnx "json validation failed"
@@ -103,12 +105,14 @@ exports.main = ->
     .option '--fork', "Don't print the result to stdout, but feed an external program w/ input"
     .option '--cmd <string>', "Custom external command instead of `#{conf.cmd.join ' '}`"
     .option '-f, --format <format>', 'Convert to rnews (default), mbox or plain'
+    .option '--template-dir <name>', 'A directory w/ custom templates'
     .parse process.argv
 
   conf.verbose = program.verbose if program.verbose
   conf.destination = 'fork' if program.fork
   conf.format = program.format  if program.format
   conf.cmd = shellquote.parse program.cmd if program.cmd
+  conf.template_dir = program.templateDir if program.templateDir
 
   ext_deps_check()
 

@@ -55,3 +55,28 @@ suite 'Message', ->
         ], results.polparts
       iamdone()
     .done()
+
+  test 'TemplateGet', ->
+    assert.equal 'Newsgroups: {{ mail.newsgroup }}', Message.TemplateGet('story', 'template/dumb').trim()
+    assert.notEqual 'Newsgroups: {{ mail.newsgroup }}', Message.TemplateGet('story').trim()
+
+    # no user template, return a system one
+    assert Message.TemplateGet('story', 'DOES NOT EXIST').length > 500
+
+    # invalid template name
+    assert.throws ->
+      Message.TemplateGet('omglol', 'template/dumb')
+    , Error
+    assert.throws ->
+      Message.TemplateGet('omglol')
+    , Error
+
+  test 'render user template', (iamdone) ->
+    story = new Message(JSON.parse(fs.readFileSync('data/stories/8863.json')), [])
+    story.opt.alt_dir = 'template/dumb'
+
+    story.render()
+    .then (r) ->
+      assert.equal 'Newsgroups: news.ycombinator', r.trim()
+      iamdone()
+    .done()
