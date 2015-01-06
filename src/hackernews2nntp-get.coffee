@@ -146,7 +146,7 @@ exports.main = ->
     crawler.look4kids = false if program.nokids
 
     crawler.event.on 'finish', (stat) ->
-      crawler.log "\n#{stat}"
+      crawler.log "\n#{stat.toString().toUpperCase()}"
     crawler.event.on 'body', (body) ->
       console.log body
 
