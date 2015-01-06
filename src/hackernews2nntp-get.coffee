@@ -19,16 +19,57 @@ errx = (msg) ->
 ids_get = (mode, spec) ->
   if mode == 'exact'
     return Q.fcall ->
-      id = parseInt(spec) || 0
-      throw new Error "mode exact: invalid id #{spec}" if id < 1
+      id = parseInt(spec[0]) || 0
+      throw new Error "mode exact: invalid id `#{spec}`" if id < 1
       [id]
 
   if mode == 'last'
-    return ids_last spec
+    return ids_last spec[0]
   if mode == 'top100'
     return ids_top100()
+  if mode == 'range'
+    return ids_range spec
   else
-    return Q.fcall -> throw new Error "invalid mode #{conf.mode}"
+    return Q.fcall -> throw new Error "invalid mode `#{mode}`"
+
+# return a promise
+ids_range = (spec) ->
+  generate = (low, high, promise) ->
+    max = 100000
+    if low < 1
+      promise.reject new Error "mode range: #{low} < 1"
+    else if high < low
+      promise.reject new Error "mode range: #{high} < #{low}"
+    else if high-low > max
+      promise.reject new Error "mode range: #{high}-#{low} > #{max}"
+    else
+      promise.resolve (idx for idx in [low..high])
+
+  deferred = Q.defer()
+  from = parseInt(spec[0]) || 0
+  to = parseInt(spec[1]) || 0
+
+  # till the end
+  if from >= 1 && to == 0
+    opt = { url: 'https://hacker-news.firebaseio.com/v0/maxitem.json?print=pretty' }
+    request.get opt, (err, res, body) ->
+      if err
+        deferred.reject new Error "mode range: #{err.message}"
+        return
+      if res.statusCode == 200
+        maxitem = parseInt(body) || 0
+        if maxitem < 1
+          deferred.reject new Error "mode range: maxitem <= 0"
+          return
+
+        generate from, maxitem, deferred
+      else
+        deferred.reject new Error "mode range: HTTP #{res.statusCode}"
+
+  else
+    generate from, to, deferred
+
+  deferred.promise
 
 # return a promise
 ids_last = (spec) ->
@@ -86,7 +127,7 @@ exports.main = ->
   program
     .version meta.version
     .usage "[options] mode [spec]
-    \n  Available modes: top100, last <number>, exact <id>"
+    \n  Available modes: top100, last <number>, exact <id>, range <from> <to>"
     .option '-v, --verbose', 'Print HTTP status on stderr'
     .option '-u, --url-pattern <string>', "Debug. Only for 'exact' mode. Default: #{conf.url_pattern}", conf.url_pattern
     .option '--nokids', "Debug"
@@ -96,7 +137,7 @@ exports.main = ->
     program.outputHelp()
     process.exit 1
 
-  ids_get program.args[0], program.args[1]
+  ids_get program.args[0], program.args[1..-1]
   .then (ids) ->
     crawler = new Crawler program.urlPattern, ids.length
     unless program.verbose
