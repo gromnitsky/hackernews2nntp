@@ -26,18 +26,20 @@ test: node_modules
 	$(MAKE) -C test
 
 define help :=
-all     -- Just compile all
+all      -- Just compile all
 
-clean   -- rm all compiled targets
+clean    -- rm all compiled targets
 
-clobber -- Clean + rm node_modules
+clobber  -- Clean + rm node_modules
 
-test    -- Run tests w/ mocha. Or
-           $$ make test TEST_OPTS='-g pattern'
+test     -- Run tests w/ mocha. Or
+            $$ make test TEST_OPTS='-g pattern'
 
-compile -- compile src/ to lib/
+compile  -- compile src/ to lib/
 
-npm     -- Publish a package to npm registry
+npm-view -- View a would-be npm-package w/o uploading it to the registry
+
+npm      -- Publish a package to npm registry
 endef
 
 .PHONY: help
