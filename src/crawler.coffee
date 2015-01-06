@@ -100,8 +100,12 @@ class Crawler
           if @look4kids & json.kids?.length > 0
             @log "#{prefix}: #{json.kids.length} kid(s)!"
             @stat.job.planned += json.kids.length
-            # RECURSION!
-            @get_item(kid, level+1, expected_type) for kid in json.kids
+            # *** RECURSION! All your memory are belong to me. ***
+            for kid in json.kids
+              @get_item(kid, level+1, expected_type)
+              .catch (err) =>
+                @event.emit 'kid:error', err
+              .done()
 
       else # res.statusCode != 200
         @stat.failed += 1

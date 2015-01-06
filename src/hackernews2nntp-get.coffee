@@ -29,6 +29,8 @@ ids_get = (mode, spec) ->
     return ids_top100()
   if mode == 'range'
     return ids_range spec
+  if mode == 'several'          # debug
+    return Q.fcall -> spec
   else
     return Q.fcall -> throw new Error "invalid mode `#{mode}`"
 
@@ -128,8 +130,9 @@ exports.main = ->
     .version meta.version
     .usage "[options] mode [spec]
     \n  Available modes: top100, last <number>, exact <id>, range <from> <to>"
-    .option '-v, --verbose', 'Print HTTP status on stderr'
-    .option '-u, --url-pattern <string>', "Debug. Only for 'exact' mode. Default: #{conf.url_pattern}", conf.url_pattern
+    .option '-s, --show-stat', 'Print some statistics after all requests'
+    .option '-v, --verbose', 'Print HTTP status on stderr (implies -s)'
+    .option '-u, --url-pattern <string>', "Debug. Default: #{conf.url_pattern}", conf.url_pattern
     .option '--nokids', "Debug"
     .parse process.argv
 
@@ -146,9 +149,11 @@ exports.main = ->
     crawler.look4kids = false if program.nokids
 
     crawler.event.on 'finish', (stat) ->
-      crawler.log "\n#{stat.toString().toUpperCase()}"
+      console.error "\n#{stat.toString().toUpperCase()}" if program.verbose || program.showStat
     crawler.event.on 'body', (body) ->
-      console.log body
+      process.stdout.write "#{body}\n"
+    crawler.event.on 'kid:error', (err) ->
+      console.error err if program.verbose
 
     for n in ids
       crawler.get_item n
