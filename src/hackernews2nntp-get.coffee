@@ -11,6 +11,9 @@ request = require 'request'
 conf =
   url_pattern: 'https://hacker-news.firebaseio.com/v0/item/%d.json'
 
+warnx = (msg) ->
+  console.error "#{path.basename process.argv[1]} warning: #{msg}"
+
 errx = (msg) ->
   console.error "#{path.basename process.argv[1]} error: #{msg}"
   process.exit 1
@@ -124,6 +127,24 @@ ids_top100 = ->
 
   deferred.promise
 
+maxitem_save = (file, id) ->
+  return unless file
+  try
+    fs.writeFileSync file, id
+  catch e
+    warnx "maxitem saiving failed: #{e.message}"
+
+maxitem_can_be_saved = (mode, stat) ->
+  return false unless mode?.match /^(last|range)$/
+
+  threshold = 80
+  succ = (stat.downloaded.files / (stat.total()-stat.stale)) * 100
+  if succ < threshold
+    warnx "#{Math.floor succ}% successful downloaded items is
+    < that #{threshold}% threshold, maxitem is not saved"
+
+  succ >= threshold
+
 exports.main = ->
 
   program
@@ -133,6 +154,7 @@ exports.main = ->
     .option '-s, --show-stat', 'Print some statistics after all requests'
     .option '-v, --verbose', 'Print HTTP status on stderr (implies -s)'
     .option '-u, --url-pattern <string>', "Debug. Default: #{conf.url_pattern}", conf.url_pattern
+    .option '--maxitem-save <file>', 'Write the highest id number to (for last & range modes only)'
     .option '--nokids', "Debug"
     .parse process.argv
 
@@ -140,7 +162,9 @@ exports.main = ->
     program.outputHelp()
     process.exit 1
 
-  ids_get program.args[0], program.args[1..-1]
+  mode = program.args[0]
+
+  ids_get mode, program.args[1..-1]
   .then (ids) ->
     crawler = new Crawler program.urlPattern, ids.length
     unless program.verbose
@@ -150,6 +174,7 @@ exports.main = ->
 
     crawler.event.on 'finish', (stat) ->
       console.error "\n#{stat.toString().toUpperCase()}" if program.verbose || program.showStat
+      maxitem_save program.maxitemSave, ids[ids.length-1] if maxitem_can_be_saved mode, stat
     crawler.event.on 'body', (body) ->
       process.stdout.write "#{body}\n"
     crawler.event.on 'kid:error', (err) ->

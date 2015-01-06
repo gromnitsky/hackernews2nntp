@@ -1,7 +1,7 @@
 {
     "name": "hackernews2nntp",
-    "version": "0.0.3",
-    "description": "Post Hacker News Stories & Comments to NNTP Server",
+    "version": "0.1.0",
+    "description": "Post Hacker News Stories & Comments to an NNTP Server",
     "keywords": [
         "nntp",
         "usenet",
