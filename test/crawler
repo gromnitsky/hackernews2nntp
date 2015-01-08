@@ -47,7 +47,7 @@ crawler.event.on 'body', (body) ->
   console.log body
 
 crawler.event.on 'kid:error', (err) ->
-  console.log err
+  console.error err
 
 for n in [start..planned]
   crawler.get_item n

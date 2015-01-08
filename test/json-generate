@@ -3,6 +3,8 @@
 # Create a bunch of mocking .json files simulating HN firebase data.
 
 fs = require 'fs'
+crypto = require 'crypto'
+u = require '../src/utils'
 
 dir = if process.argv[2] then process.argv[2] else 'data/json'
 
@@ -19,6 +21,10 @@ gen_story = (n) ->
 
 gen_comment = (n) ->
   json = JSON.stringify {id: n, type: 'comment'}
+  fs.writeFileSync "#{n}.json", json
+
+gen_comment_random_body = (n) ->
+  json = JSON.stringify {id: n, type: crypto.pseudoRandomBytes(u.randrange 2500, 25000).toString('hex')}
   fs.writeFileSync "#{n}.json", json
 
 gen_comment_invalid_json = (n) ->
@@ -44,3 +50,6 @@ gen_comment_invalid_json idx for idx in [501..510]
 
 gen_poll 20, 2, true            # broken
 gen_poll 30, 2, false
+
+#gen_comment_random_body idx for idx in [2000..3000] # notice the gap
+#gen_comment_random_body idx for idx in [4000..23000]
