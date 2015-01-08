@@ -31,7 +31,11 @@ class Stat
   total: ->
     @downloaded.files + @failed + @invalid + @stale
 
-  finished: ->
+  finished: (cur_id) ->
+    # console.error "#{cur_id} ----- total=#{@total()},
+    #   downloaded.files=#{@downloaded.files}, failed=#{@failed},
+    #   invalid=#{@invalid}, @stale=#{@stale},
+    #   jp=#{@job.cur}, jp=#{@job.planned}"
     (@total() == @job.planned) && (@job.planned != 0)
 
   toString: ->
@@ -61,8 +65,8 @@ class Crawler
   prefix: (id, level) ->
     "jc=#{@stat.job.cur}/l=#{level}/jp=#{@stat.job.planned} #{@url(id)}"
 
-  finish_check: ->
-    @event.emit 'finish', @stat if @stat.finished()
+  finish_check: (cur_id) ->
+    @event.emit 'finish', @stat if @stat.finished cur_id
 
   # return a promise
   get_item: (id, level = 0, expected_type = null) ->
@@ -71,15 +75,14 @@ class Crawler
     deferred = Q.defer()
     unless id
       deferred.reject new Error "no id, cannot do HTTP GET"
-      @finish_check()
+      @finish_check id
       return deferred.promise
 
     cur_req = request.get {url: @url(id), headers: @headers}, (err, res, body) =>
       if err
         @stat.failed += 1
-        @log "#{prefix}: Error: #{err.message}"
         deferred.reject new Error "#{id}: #{err.message}"
-        @finish_check()
+        @finish_check id
         return
 
       if res.statusCode == 200
@@ -109,16 +112,14 @@ class Crawler
 
       else # res.statusCode != 200
         @stat.failed += 1
-        @log "#{prefix}: HTTP #{res.statusCode}"
         deferred.reject new Error "#{id}: HTTP #{res.statusCode}"
 
-      @finish_check()
+      @finish_check id
 
     .on 'request', (req) =>
       if (@stat.history[id] == true || @stat.history_pending_request[id] == true) &&
           expected_type != 'pollopt'
         @stat.stale += 1
-        @log "#{prefix}: aborted HTTP GET"
         cur_req.abort()
         deferred.reject new Error "#{id}: saw it already"
       else
