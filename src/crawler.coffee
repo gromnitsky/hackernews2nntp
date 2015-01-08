@@ -90,7 +90,7 @@ class Crawler
           @stat.history_add id, body
 
           if json.type == 'poll'
-            @log "#{prefix}: collecting #{json.parts.length} pollopts"
+            @log "#{prefix}: collecting #{json.parts?.length} pollopts"
             @get_fullpoll id, json.parts, body, deferred
           else
             @event.emit 'body', body unless json.type?.match /^poll/
@@ -152,7 +152,7 @@ class Crawler
 
   collect_pollopts: (poll_id, parts) ->
     deferred = Q.defer()
-    if parts.length == 0
+    if !util.isArray(parts) || parts.length == 0
       deferred.reject new Error "#{poll_id}: invalid poll w/o parts"
       return deferred.promise
 
