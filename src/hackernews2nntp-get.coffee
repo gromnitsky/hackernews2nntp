@@ -120,9 +120,11 @@ exports.main = ->
         # empty
     crawler.look4kids = false if program.nokids
 
-    crawler.event.on 'finish', (stat) ->
-      console.error "\n#{stat.toString().toUpperCase()}" if program.verbose || program.showStat
-      maxitem_save program.maxitemSave, ids[ids.length-1] if maxitem_can_be_saved mode, stat
+    process.on 'exit', ->
+      console.error "\n#{crawler.stat.toString().toUpperCase()}" if program.verbose || program.showStat
+      if program.maxitemSave && maxitem_can_be_saved mode, crawler.stat
+        maxitem_save program.maxitemSave, ids[ids.length-1]
+
     crawler.event.on 'body', (body) ->
       process.stdout.write "#{body}\n"
     crawler.event.on 'kid:error', (err) ->
