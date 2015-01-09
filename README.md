@@ -9,7 +9,7 @@ Or _how to read HN offline_.
 * CLI
 * Compatible w/ cron jobs
 * MIME `multipart/alternative` mails w/ html & txt portions
-* Stateless
+* Mostly stateless
 * Read-only
 * No up-voting support or score updates
 
@@ -17,7 +17,7 @@ Or _how to read HN offline_.
 
 ## Requirements
 
-* nodejs 0.10.x
+* nodejs 0.10.3x
 * `rnews` CL util from INN package
 * w3m browser
 
@@ -68,7 +68,7 @@ settings), run
 
 0. Get top 100 stories & all comments for them, then exit:
 
-	$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v | sudo rnews -N
+		$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v | sudo rnews -N
 
 	If you get an EPIPE error, don't pipe to rnews but try to invoke
 	`hackernews2nntp-conver` w/ `--fork` option:
@@ -79,12 +79,21 @@ settings), run
 
 1. Get last 200 stories/comments, then exit:
 
-		$ hackernews2nntp-get last 200 -v | hackernews2nntp-convert -v | sudo rnews -N
+		$ hackernews2nntp-get last 200 -v --nokids | hackernews2nntp-convert -v | sudo rnews -N
 
 2. Don't post anything to an NNTP server but create 1 big .mbox file:
 
 		$ rm 1.mbox
 		$ hackernews2nntp-get top100 -v | hackernews2nntp-convert -v -f mbox >> 1.mbox
+
+3. Get stories/comments in range from 8,000,000 to 8,000,100:
+
+		$ hackernews2nntp-get -v --nokids range 8000000 8000100 | hackernews2nntp-convert -v | sudo rnews -N
+
+4. Get stories/comments from 8859730 up to the most current one & save the
+   last (highest numerical value) item id in `/tmp/last-item.txt`:
+
+		$ hackernews2nntp-get -v --maxitem-save /tmp/last-item.txt --nokids range 8859730 | hackernews2nntp-convert -v | sudo rnews -N
 
 
 ## FAQ
@@ -137,6 +146,10 @@ settings), run
 * Supports only UTF-8 locale.
 * Don't follow 'parent' property, e.g. if it gets a comment, it tries to
   download all its 'kids', but ignores the 'parent'.
+* `hackernews2nntp-get` can eat all your RAM if you're not using
+  `--nokids` option.
+* No throttling of any kind (not counting node's internal
+  `agent.maxSockets`).
 * `src/crawler.coffee` is especially ugly.
 
 
@@ -152,6 +165,19 @@ settings), run
 
 * Post w/o rnews.
 
+
+## News
+
+### 0.1.0
+
+* `hackernews2nntp-get`
+	- `range` mode
+	- `--maxitem-save` CLO
+	- `-s` CLO
+	- always print statistics on exit w/ `-v` or `-s` CLOs
+
+* `hackernews2nntp-convert`
+	- `--template-dir` CLO
 
 ## License
 
