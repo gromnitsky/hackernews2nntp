@@ -58,10 +58,14 @@ class Stat
   # id -- item id
   history: (iter_id, id, err, iter_id_next = null) ->
     o = @_history[iter_id] ||= {}
+    o[id] ||= []
+    last = o[id][o[id].length-1]
+    o[id].pop() if last?.iter_id_next == 'http get'
+
     info = {}
     info.err = err if err
     info.iter_id_next = iter_id_next.toString() if iter_id_next
-    o[id] = info
+    o[id].push info
     @event.emit 'herr', err if info.err
 
   iter_id_next: ->
@@ -97,11 +101,12 @@ class Stat
       'NoConnect': 'neterr'
 
     for id,val of ids
-      for item in val
-        if !item.err
-          r.items++
-        else
-          r[errclass2desc[item.err.constructor.name]]++
+      for items in val
+        for item in items
+          if !item.err
+            r.items++
+          else
+            r[errclass2desc[item.err.constructor.name]]++
 
     r
 
@@ -125,7 +130,6 @@ class Crawler2
     true
 
   @iterIdValidate = (iter_id, deferred) ->
-    u.isStr = (s) -> toString.apply(s) == '[object String]'
     unless u.isStr(iter_id) || u.isNum(iter_id)
       deferred.reject new Error "invalid iter_id `#{iter_id}`"
       return false
@@ -244,7 +248,7 @@ class Crawler2
           cur_req.abort()
       else
         log "HTTP GET"
-        @stat.history iter_id, id, null, null
+        @stat.history iter_id, id, null, 'http get'
 
     deferred.promise
 
