@@ -161,21 +161,13 @@ class Crawler2
         if r.type == 'pollopt'
           throw makeError PolloptInIteration, iter_id, r.id, "must be processed by Crawler2#poll()"
 
-        else if r.type == 'poll'
+        if r.type == 'poll'
           iter_id_next = @stat.iter_id_next() + '.poll'
           @stat.history iter_id, r.id, null, iter_id_next
           @event.emit 'poll', iter_id_next, r
-
         else
           @event.emit 'data', iter_id, JSON.stringify r
-
-          if r.kids && @look4kids
-            iter_id_next = @stat.iter_id_next()
-            @stat.history iter_id, r.id, null, iter_id_next
-
-            @event.emit 'items', iter_id_next, r.kids
-          else
-            @stat.history iter_id, r.id, null, null
+          @stat.history iter_id, r.id, null, null unless @iteration_4kids iter_id, r
 
       .catch (err) =>
         if err instanceof CrawlerError
@@ -183,6 +175,12 @@ class Crawler2
         else
           throw err
       .done()
+
+  iteration_4kids: (iter_id, item) ->
+    if item.kids && @look4kids
+      iter_id_next = @stat.iter_id_next()
+      @stat.history iter_id, item.id, null, iter_id_next
+      @event.emit 'items', iter_id_next, item.kids
 
   # Emit a 'data' msg if a poll was collected w/o errors.
   #
@@ -192,6 +190,8 @@ class Crawler2
   # Side effects: modifies @stat
   # Return: nothing
   poll: (iter_id, item) ->
+    @iteration_4kids iter_id, item
+
     # include poll item itself before its additional parts
     parts = [JSON.stringify item]
 
