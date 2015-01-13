@@ -14,7 +14,7 @@ request = require 'request'
 conf =
   url_pattern: 'https://hacker-news.firebaseio.com/v0/item/%d.json'
   verbose: 0
-  conn_per_sec: 50
+  conn_per_sec: Crawler2.CONN_PER_SEC
 
 # return a promise
 ids_get = (mode, spec) ->
@@ -103,7 +103,7 @@ exports.main = ->
     .option '-u, --url-pattern <string>', "Debug. Default: #{conf.url_pattern}", conf.url_pattern
     .option '--nokids', "Debug"
     .option '--ids-only', "Debug"
-    .option '--conn-per-sec <digit>', "HTTP request limit. Default: #{conf.conn_per_sec}", conf.conn_per_sec
+    .option '--conn-per-sec <digit>', "HTTP request limit (0 == no limit). Default: #{conf.conn_per_sec}", conf.conn_per_sec
     .parse process.argv
 
   if program.args.length < 1

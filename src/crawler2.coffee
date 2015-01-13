@@ -135,7 +135,9 @@ class Crawler2
       return false
     true
 
-  constructor: (@conn_per_sec = 50) ->
+  @CONN_PER_SEC = 20
+
+  constructor: (@conn_per_sec = Crawler2.CONN_PER_SEC) ->
     @url_pattern = 'https://hacker-news.firebaseio.com/v0/item/%s.json'
     @look4kids = true
     @logger = console.error
