@@ -5,13 +5,14 @@ fs = require 'fs'
 http = require 'http'
 url = require 'url'
 path = require 'path'
+util = require 'util'
 
 Q = require 'q'
 
-Crawler = require '../src/crawler'
+Crawler2 = require '../src/crawler2'
 
 # create a static http server
-server = http.createServer().listen 8123, 'localhost'
+server = http.createServer().listen 8801, 'localhost'
 server.on 'request', (req, res) ->
   url_parts = url.parse req.url, true
 
@@ -35,22 +36,21 @@ server.on 'request', (req, res) ->
 
 # main
 
-start = 1
-planned = 44
-crawler = new Crawler "http://localhost:8123/%d.json", planned
-crawler.event.on 'finish', (stat) ->
-  crawler.log "\n#{stat}"
-  server.close()
-#  console.log crawler.stat.history_pending_request
+crawler2 = new Crawler2 50
+crawler2.url_pattern = "http://localhost:8801/%d.json"
 
-crawler.event.on 'body', (body) ->
-  console.log body
+crawler2.event.on 'data', (iter_id, data) ->
+  console.error "iter_id=#{iter_id}: `#{data}`"
 
-crawler.event.on 'kid:error', (err) ->
-  console.error err
+crawler2.event.on 'herr', (err) ->
+  console.error "ERROR: ii=#{err.iter_id}/id=#{err.id}: #{err.message}"
 
-for n in [start..planned]
-  crawler.get_item n
-  .catch (err) ->
-    console.error err
-  .done()
+process.on 'exit', ->
+  console.error util.inspect crawler2.stat._history, { showHidden: false, depth: 2 }
+  console.error "STAT: " + util.inspect crawler2.stat.succinct()
+
+crawler2.event.emit 'items', 1, [1..44]
+
+setTimeout ->
+  process.exit 0
+, 4000

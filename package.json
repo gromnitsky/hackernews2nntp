@@ -1,33 +1,34 @@
 {
-    "name": "hackernews2nntp",
-    "version": "0.1.0",
-    "description": "Post Hacker News Stories & Comments to an NNTP Server",
-    "keywords": [
-        "nntp",
-        "usenet",
-        "hacker news",
-		"offline"
-    ],
-    "author": "Alexander Gromnitsky <alexander.gromnitsky@gmail.com>",
-    "license": {
-        "type": "MIT",
-        "url": "http://opensource.org/licenses/mit-license.php"
-    },
-    "url": "https://github.com/gromnitsky/hackernews2nntp",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/gromnitsky/hackernews2nntp.git"
-    },
-    "preferGlobal": true,
+	"name": "hackernews2nntp",
+	"version": "0.2.0",
+	"description": "Post Hacker News Stories & Comments to an NNTP Server",
+	"keywords": [
+		"nntp",
+		"usenet",
+		"hacker news",
+		"offline",
+		"mbox"
+	],
+	"author": "Alexander Gromnitsky <alexander.gromnitsky@gmail.com>",
+	"license": {
+		"type": "MIT",
+		"url": "http://opensource.org/licenses/mit-license.php"
+	},
+	"url": "https://github.com/gromnitsky/hackernews2nntp",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/gromnitsky/hackernews2nntp.git"
+	},
+	"preferGlobal": true,
 	"bin": {
 		"hackernews2nntp-get": "./bin/hackernews2nntp-get",
 		"hackernews2nntp-convert": "./bin/hackernews2nntp-convert"
 	},
-
 	"dependencies": {
 		"coffee-script": "~1.8.0",
 		"commander": "~2.5.0",
 		"jjv": "~1.0.2",
+		"limiter": "~1.0.5",
 		"mimelib": "~0.2.18",
 		"mocha": "~2.0.1",
 		"mustache": "~0.8.2",

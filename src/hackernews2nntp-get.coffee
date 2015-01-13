@@ -1,8 +1,9 @@
 fs = require 'fs'
 path = require 'path'
+util = require 'util'
 
 meta = require '../package.json'
-Crawler = require './crawler'
+Crawler2 = require './crawler2'
 livedata = require './livedata'
 u = require './utils'
 
@@ -12,6 +13,8 @@ request = require 'request'
 
 conf =
   url_pattern: 'https://hacker-news.firebaseio.com/v0/item/%d.json'
+  verbose: 0
+  conn_per_sec: 50
 
 # return a promise
 ids_get = (mode, spec) ->
@@ -95,11 +98,12 @@ exports.main = ->
     .usage "[options] mode [spec]
     \n  Available modes: top100, last <number>, exact <id>, range <from> <to>"
     .option '-s, --show-stat', 'Print some statistics after all requests'
-    .option '-v, --verbose', 'Print HTTP status on stderr (implies -s)'
+    .option '-v, --verbose', 'Print HTTP status on stderr (implies -s)', -> conf.verbose++
     .option '--maxitem-save <file>', 'Write the highest id number to (for last & range modes only)'
     .option '-u, --url-pattern <string>', "Debug. Default: #{conf.url_pattern}", conf.url_pattern
     .option '--nokids', "Debug"
     .option '--ids-only', "Debug"
+    .option '--conn-per-sec <digit>', "HTTP request limit. Default: #{conf.conn_per_sec}", conf.conn_per_sec
     .parse process.argv
 
   if program.args.length < 1
@@ -114,27 +118,27 @@ exports.main = ->
       console.error ids
       process.exit 0
 
-    crawler = new Crawler program.urlPattern, ids.length
-    unless program.verbose
-      crawler.log = ->
+    crawler2 = new Crawler2 program.connPerSec
+    crawler2.url_pattern = program.urlPattern
+    unless conf.verbose
+      crawler2.logger = ->
         # empty
-    crawler.look4kids = false if program.nokids
+    crawler2.look4kids = false if program.nokids
 
     process.on 'exit', ->
-      console.error "\n#{crawler.stat.toString().toUpperCase()}" if program.verbose || program.showStat
-      if program.maxitemSave && maxitem_can_be_saved mode, crawler.stat
+      console.error "\nSTAT: " + util.inspect crawler2.stat.succinct() if conf.verbose || program.showStat
+      console.error util.inspect crawler2.stat._history, { showHidden: false, depth: null } if conf.verbose >= 2
+      if program.maxitemSave && maxitem_can_be_saved mode, crawler2.stat
         maxitem_save program.maxitemSave, ids[ids.length-1]
 
-    crawler.event.on 'body', (body) ->
-      process.stdout.write "#{body}\n"
-    crawler.event.on 'kid:error', (err) ->
-      console.error err if program.verbose
+    crawler2.event.on 'data', (iter_id, data) ->
+      process.stdout.write "#{data}\n"
 
-    for n in ids
-      crawler.get_item n
-      .catch (err) ->
-        console.error err if program.verbose
-      .done()
+    crawler2.event.on 'herr', (err) ->
+      console.error "ERROR: ii=#{err.iter_id}/id=#{err.id}: #{err.message}" if conf.verbose
+
+    # start 1st iteration
+    crawler2.event.emit 'items', crawler2.stat.iter_id_next(), ids
 
   .catch (err) ->
     u.errx err.message
