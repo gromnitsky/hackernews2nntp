@@ -2,6 +2,7 @@ assert = require 'assert'
 fs = require 'fs'
 
 Message = require '../src/message'
+mbox = require '../src/mbox'
 
 suite 'Message', ->
   setup ->
@@ -80,3 +81,8 @@ suite 'Message', ->
       assert.equal 'Newsgroups: news.ycombinator', r.trim()
       iamdone()
     .done()
+
+  test 'mbox', ->
+    assert.equal 'From user@example.com Fri Nov 21 14:32:12 2014', mbox.prefix {time: 1416580332, by: 'user'}
+    assert.equal 'From user@example.com Fri Nov 21 14:32:07 2014', mbox.prefix {time: 1416580327, by: 'user'}
+    assert.equal 'From user@example.com Sun Apr 08 19:05:04 2012', mbox.prefix {time: 1333911904, by: 'user'}

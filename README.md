@@ -170,14 +170,21 @@ settings), run
 
 ### 0.1.0
 
-* `hackernews2nntp-get`
+* hackernews2nntp-get
 	- `range` mode
 	- `--maxitem-save` CLO
 	- `-s` CLO
 	- always print statistics on exit w/ `-v` or `-s` CLOs
 
-* `hackernews2nntp-convert`
+* hackernews2nntp-convert
 	- `--template-dir` CLO
+	- fix a bug in mbox header w/ missing leading zeros
+
+## Credits
+
+Many thanks to [John Magolske](http://B79.net/contact) for suggestions
+for hackernews2nntp-get `range` mode & `--maxitem-save` CLO & also for
+reporting bugs.
 
 ## License
 
