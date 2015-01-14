@@ -96,10 +96,14 @@ suite 'Crawler2', ->
     crw.event.on 'data', (iter_id, data) ->
       assert.equal 1, JSON.parse(data).id
 
-    crw.event.on 'herr', (err) ->
-      error_count++
-      # 500 must be NoItem, 1 -- Dup
-      iamdone() if 2 == error_count
+    crw.event.on 'finish', ->
+      stat = crw.stat.succinct()
+      assert.equal 1, stat.items
+      assert.equal 0, stat.neterr
+      assert.equal 0, stat.invalid
+      assert.equal 1, stat.dup
+      assert.equal 2, stat.uniq
+      iamdone()
 
   test 'emit "poll"', (iamdone) ->
     crw = new Crawler2()
@@ -110,6 +114,11 @@ suite 'Crawler2', ->
     error_count = 0
     crw.event.emit 'items', iter_id, [7,2,3,9]
 
-    crw.event.on 'herr', (err) ->
-      error_count++
-      iamdone() if 3 == error_count
+    crw.event.on 'finish', ->
+      stat = crw.stat.succinct()
+      assert.equal 9, stat.items
+      assert.equal 2, stat.neterr
+      assert.equal 1, stat.invalid
+      assert.equal 0, stat.dup
+      assert.equal 8, stat.uniq
+      iamdone()

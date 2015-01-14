@@ -54,6 +54,7 @@ class Stat
     @iter_id = 0
     @_history = {}
     @bytes = 0
+    @_iterations = []
 
   # id -- item id
   history: (iter_id, id, err, iter_id_next = null) ->
@@ -110,6 +111,19 @@ class Stat
 
     r
 
+  iteration_begin: (iter_id) ->
+    idx = @_iterations.indexOf iter_id
+    if idx == -1
+      @_iterations.push iter_id
+      @event.emit 'iteration:begin', iter_id
+
+  iteration_end: (iter_id) ->
+    idx = @_iterations.indexOf iter_id
+    unless idx == -1
+      @_iterations.splice idx, 1
+      @event.emit 'iteration:end', iter_id
+      @event.emit 'finish' if @_iterations.length == 0
+
 item_validate = (json) ->
   return false if !json.id
   return false if !json.type?.match /^(story|comment|poll|pollopt)$/
@@ -161,26 +175,31 @@ class Crawler2
   iteration: (iter_id, idarr) ->
     throw new Error "array of IDs is expected" unless util.isArray idarr
 
-    for id in idarr
-      @fetch_item(iter_id, id)
-      .then (r) =>
-        if r.type == 'pollopt'
-          throw makeError PolloptInIteration, iter_id, r.id, "must be processed by Crawler2#poll()"
+    for id,idx in idarr
+      @stat.iteration_begin iter_id if idx == 0
 
-        if r.type == 'poll'
-          iter_id_next = @stat.iter_id_next() + '.poll'
-          @stat.history iter_id, r.id, null, iter_id_next
-          @event.emit 'poll', iter_id_next, r
-        else
-          @event.emit 'data', iter_id, JSON.stringify r
-          @stat.history iter_id, r.id, null, null unless @iteration_4kids iter_id, r
+      do (idx) =>
+        @fetch_item(iter_id, id)
+        .then (r) =>
+          if r.type == 'pollopt'
+            throw makeError PolloptInIteration, iter_id, r.id, "must be processed by Crawler2#poll()"
 
-      .catch (err) =>
-        if err instanceof CrawlerError
-          @stat.history iter_id, err.id, err, null
-        else
-          throw err
-      .done()
+          if r.type == 'poll'
+            iter_id_next = @stat.iter_id_next() + '.poll'
+            @stat.history iter_id, r.id, null, iter_id_next
+            @event.emit 'poll', iter_id_next, r
+          else
+            @event.emit 'data', iter_id, JSON.stringify r
+            @stat.history iter_id, r.id, null, null unless @iteration_4kids iter_id, r
+
+        .catch (err) =>
+          if err instanceof CrawlerError
+            @stat.history iter_id, err.id, err, null
+          else
+            throw err
+        .fin =>
+          @stat.iteration_end iter_id if idx == idarr.length-1
+        .done()
 
   iteration_4kids: (iter_id, item) ->
     if item.kids && @look4kids
@@ -202,20 +221,25 @@ class Crawler2
     parts = [JSON.stringify item]
 
     promises = []
-    for id in item.parts
-      p = @fetch_item(iter_id, id)
-      promises.push p
+    for id,idx in item.parts
+      @stat.iteration_begin iter_id if idx == 0
 
-      p.then (r) =>
-        @stat.history iter_id, r.id, null, null
-        parts.push JSON.stringify r
-      .catch (err) =>
-        # current pollopt is invalid
-        if err instanceof CrawlerError
-          @stat.history iter_id, err.id, err, null
-        else
-          throw err
-      .done()
+      do (idx) =>
+        p = @fetch_item(iter_id, id)
+        promises.push p
+
+        p.then (r) =>
+          @stat.history iter_id, r.id, null, null
+          parts.push JSON.stringify r
+        .catch (err) =>
+          # current pollopt is invalid
+          if err instanceof CrawlerError
+            @stat.history iter_id, err.id, err, null
+          else
+            throw err
+        .fin =>
+          @stat.iteration_end iter_id if idx == item.parts.length-1
+        .done()
 
     # wait for all promises to finish
     Q.all(promises).then =>
