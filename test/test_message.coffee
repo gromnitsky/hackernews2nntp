@@ -1,6 +1,7 @@
 assert = require 'assert'
 fs = require 'fs'
 
+require './helper'
 Message = require '../src/message'
 
 suite 'Message', ->

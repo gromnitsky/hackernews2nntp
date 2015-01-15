@@ -3,6 +3,8 @@
 http = require 'http'
 url = require 'url'
 
+u = require '../src/utils'
+
 _items = [
   {},
   {
@@ -73,21 +75,45 @@ for item,idx in _items
 _items[12] = "garbage"
 
 
+sent_str = (res, str) ->
+  res.setHeader 'Content-Type', 'application/json'
+  res.setHeader 'Content-Length', str.length
+  res.write str
+
 exports.start = (port) ->
   server = http.createServer().listen port, 'localhost'
   server.on 'request', (req, res) ->
     url_parts = url.parse req.url, true
 
-    m = url_parts.pathname.match /^\/([0-9]+)\.json$/
-    if !m?[1]
-      res.statusCode = 400
-    else
-      if (item = _items[parseInt m[1]])
-        res.setHeader 'Content-Type', 'application/json'
-        res.setHeader 'Content-Length', item.length
-        res.write item
+    if url_parts.pathname.match /^\/items\/memory/
+      m = url_parts.pathname.match /\/([0-9]+)\.json$/
+      if !m?[1]
+        res.statusCode = 400
+      else
+        if (item = _items[parseInt m[1]])
+          res.setHeader 'Content-Type', 'application/json'
+          res.setHeader 'Content-Length', item.length
+          res.write item
+        else
+          res.statusCode = 404
+
+    else if url_parts.pathname.match /^\/livedata\//
+      if url_parts.pathname.match /\/livedata\/maxitem.json$/
+        sent_str res, u.randrange(1,100).toString()
+      else if url_parts.pathname.match /\/zero\/maxitem.json$/
+        sent_str res, '0'
+
+      else if url_parts.pathname.match /\/livedata\/topstories.json$/
+        sent_str res, JSON.stringify [1,2,3]
+      else if url_parts.pathname.match /\/zero\/topstories.json$/
+        sent_str res, JSON.stringify []
+      else if url_parts.pathname.match /\/garbage\/topstories.json$/
+        sent_str res, JSON.stringify 'garbage'
       else
         res.statusCode = 404
+
+    else
+      res.statusCode = 500
 
     res.end()
 

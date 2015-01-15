@@ -2,15 +2,13 @@ assert = require 'assert'
 
 Q = require 'q'
 
+require './helper'
 Crawler2 = require '../src/crawler2'
-server = require './server'
-
-my_server = server.start 8800
 
 suite 'Crawler2', ->
   setup ->
     @crawler2 = new Crawler2()
-    @crawler2.url_pattern = 'http://localhost:8800/%s.json'
+    @crawler2.url_pattern = 'http://localhost:8800/items/memory/%s.json'
     @crawler2.logger = ->
 
   test 'fetch_item_bare invalid invocation1', (iamdone) ->
@@ -86,7 +84,7 @@ suite 'Crawler2', ->
 
   test 'emit "items"', (iamdone) ->
     crw = new Crawler2()
-    crw.url_pattern = 'http://localhost:8800/%s.json'
+    crw.url_pattern = 'http://localhost:8800/items/memory/%s.json'
     crw.logger = ->
     iter_id = crw.stat.iter_id_next()
 
@@ -107,7 +105,7 @@ suite 'Crawler2', ->
 
   test 'emit "poll"', (iamdone) ->
     crw = new Crawler2()
-    crw.url_pattern = 'http://localhost:8800/%s.json'
+    crw.url_pattern = 'http://localhost:8800/items/memory/%s.json'
     crw.logger = ->
     iter_id = crw.stat.iter_id_next()
 
