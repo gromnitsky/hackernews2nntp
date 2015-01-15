@@ -9,7 +9,7 @@ npm: compile
 	rm -f README.html
 	npm publish
 
-.PHONY: npm
+.PHONY: npm-view
 npm-view: compile
 	rm -f README.html hackernews2nntp-*.tgz
 	npm pack && less hackernews2nntp-*.tgz
