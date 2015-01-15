@@ -45,12 +45,9 @@ crawler2.event.on 'data', (iter_id, data) ->
 crawler2.event.on 'herr', (err) ->
   console.error "ERROR: ii=#{err.iter_id}/id=#{err.id}: #{err.message}"
 
-process.on 'exit', ->
-  console.error util.inspect crawler2.stat._history, { showHidden: false, depth: 2 }
+crawler2.event.on 'finish', ->
+  console.error util.inspect crawler2.stat._history, { showHidden: false, depth: null }
   console.error "STAT: " + util.inspect crawler2.stat.succinct()
+  process.exit 0
 
 crawler2.event.emit 'items', 1, [1..44]
-
-setTimeout ->
-  process.exit 0
-, 4000
