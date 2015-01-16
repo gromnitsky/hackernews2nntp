@@ -9,6 +9,7 @@ include mk/debug.mk
 include mk/readme.mk
 include mk/node.mk
 include mk/src.mk
+include mk/watch.mk
 
 all: node_modules $(html) compile
 
@@ -40,6 +41,8 @@ compile  -- compile src/ to lib/
 npm-view -- View a would-be npm-package w/o uploading it to the registry
 
 npm      -- Publish a package to npm registry
+
+watch    -- Use watchman to auto-run 'compile' target
 endef
 
 .PHONY: help
