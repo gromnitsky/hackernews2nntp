@@ -146,11 +146,9 @@ settings), run
 * Supports only UTF-8 locale.
 * Don't follow 'parent' property, e.g. if it gets a comment, it tries to
   download all its 'kids', but ignores the 'parent'.
-* `hackernews2nntp-get` can eat all your RAM if you're not using
+* `hackernews2nntp-get` can pause node 0.10.x process if you're not using
   `--nokids` option.
-* No throttling of any kind (not counting node's internal
-  `agent.maxSockets`).
-* `src/crawler.coffee` is especially ugly.
+* `src/crawler2.coffee` is too long.
 
 
 ## See Also
@@ -161,12 +159,13 @@ settings), run
 [sudoers(5)](http://www.sudo.ws/sudo/man/1.8.10/sudoers.man.html)
 
 
-## TODO
-
-* Post w/o rnews.
-
-
 ## News
+
+### 0.2.0
+
+* hackernews2nntp-get
+	- totally rewrite Crawler
+	- throttle a max number of http requests by 20/s (see `--conn-per-sec`)
 
 ### 0.1.0
 
