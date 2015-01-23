@@ -124,18 +124,19 @@ class Stat
       @event.emit 'iteration:end', iter_id
       @event.emit 'finish' if @_iterations.length == 0
 
-item_validate = (json) ->
-  return false if !json.id
-  return false if !json.type?.match /^(story|comment|poll|pollopt)$/
-  return false if json.kids && !util.isArray json.kids
-
-  return false if json.type == 'poll' && !json.parts
-  return false if json.type == 'poll' && !util.isArray json.parts
-  return false if json.type == 'poll' && json.parts.length == 0
-
-  true
-
 class Crawler2
+
+  @ItemValidate = (json) ->
+    return false unless json
+    return false if !json.id
+    return false if !json.type?.toString().match /^(story|comment|poll|pollopt)$/
+    return false if json.kids && !util.isArray json.kids
+
+    return false if json.type == 'poll' && !json.parts
+    return false if json.type == 'poll' && !util.isArray json.parts
+    return false if json.type == 'poll' && json.parts.length == 0
+
+    true
 
   @idValidate = (id, deferred) ->
     unless u.isNum id
@@ -294,7 +295,7 @@ class Crawler2
         deferred.reject makeError InvalidJSON, iter_id, id, "invalid JSON"
         return
 
-      if item_validate item
+      if Crawler2.ItemValidate item
         deferred.resolve item
       else
         deferred.reject makeError InvalidItem, iter_id, id, "invalid data in the item"

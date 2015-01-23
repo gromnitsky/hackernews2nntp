@@ -11,6 +11,25 @@ suite 'Crawler2', ->
     @crawler2.url_pattern = 'http://localhost:8800/items/memory/%s.json'
     @crawler2.logger = ->
 
+  test 'ItemValidate', ->
+    assert.equal false, Crawler2.ItemValidate null
+    assert.equal false, Crawler2.ItemValidate ''
+    assert.equal false, Crawler2.ItemValidate {}
+    assert.equal false, Crawler2.ItemValidate {id: 1}
+    assert.equal false, Crawler2.ItemValidate {id: 1, type: 1}
+    assert.equal false, Crawler2.ItemValidate {id: 1, type: 'BWAA!'}
+    assert.equal false, Crawler2.ItemValidate {id: 1, type: 'poll'}
+    assert.equal false, Crawler2.ItemValidate {id: 1, type: 'poll', parts: 1}
+    assert.equal false, Crawler2.ItemValidate {id: 1, type: 'poll', parts: []}
+
+    assert.equal true, Crawler2.ItemValidate {id: 1, type: 'poll', parts: [1]}
+    assert.equal true, Crawler2.ItemValidate {id: 1, type: 'story'}
+
+    assert.equal false, Crawler2.ItemValidate \
+      {id: 1, type: 'poll', parts: [1], kids: 1}
+    assert.equal true, Crawler2.ItemValidate \
+      {id: 1, type: 'poll', parts: [1], kids: []}
+
   test 'fetch_item_bare invalid invocation1', (iamdone) ->
     deferred = Q.defer()
     @crawler2.fetch_item_bare null, null, deferred

@@ -1,6 +1,6 @@
 {
 	"name": "hackernews2nntp",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Post Hacker News Stories & Comments to an NNTP Server",
 	"keywords": [
 		"nntp",

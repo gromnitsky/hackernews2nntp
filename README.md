@@ -161,6 +161,11 @@ settings), run
 
 ## News
 
+### 0.2.1
+
+* hackernews2nntp-get
+	- fix a crash in json validation
+
 ### 0.2.0
 
 * hackernews2nntp-get
