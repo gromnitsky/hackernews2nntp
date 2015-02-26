@@ -17,7 +17,8 @@ Or _how to read HN offline_.
 
 ## Requirements
 
-* nodejs 0.10.3x
+* nodejs 0.10.3x (**doesn't work w/ node 0.12 or iojs** due to
+  [request](https://github.com/request/request) dependency)
 * `rnews` CL util from INN package
 * w3m browser
 
